@@ -34,6 +34,7 @@ export class AuthController {
   @Get('profile')
   @HttpCode(HttpStatus.OK)
   getProfile(@GetUser() user: { sub: string }) {
+    console.log('>>> [AuthController] getProfile hit for userId:', user.sub);
     return this.authService.getProfile(user.sub);
   }
 

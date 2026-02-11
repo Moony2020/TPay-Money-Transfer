@@ -41,14 +41,37 @@ export class TransferService {
       throw new ConflictException('Transaction with this idempotency key is already in progress or failed');
     }
 
-    // --- Business Validation ---
-    if (dto.senderWalletId === dto.recipientWalletId) {
-      throw new BadRequestException('Cannot transfer to the same wallet');
+    // --- Phone Number Resolution ---
+    let finalRecipientWalletId = dto.recipientWalletId;
+
+    if (!finalRecipientWalletId && dto.recipientPhone) {
+      // Cross-schema query to resolve phone to user ID
+      const users: any[] = await this.prisma.$queryRaw`
+        SELECT id FROM public.users WHERE phone_number = ${dto.recipientPhone} LIMIT 1
+      `;
+      
+      const userId = users[0]?.id;
+      if (!userId) {
+        throw new BadRequestException('Recipient phone number not found');
+      }
+
+      // Find or create wallet for this user
+      const recipientWallet = await this.walletService.getOrCreateWalletByUserId(userId);
+      finalRecipientWalletId = recipientWallet.id;
+    }
+
+    if (!finalRecipientWalletId) {
+      throw new BadRequestException('Recipient wallet or phone number is required');
     }
 
     const amount = new Decimal(dto.amount);
     if (amount.lessThanOrEqualTo(0)) {
       throw new BadRequestException('Amount must be positive');
+    }
+
+    // --- Business Validation ---
+    if (dto.senderWalletId === finalRecipientWalletId) {
+      throw new BadRequestException('Cannot transfer to the same wallet');
     }
 
     // --- Execute Atomic Transaction ---
@@ -68,7 +91,7 @@ export class TransferService {
               type: TransactionType.P2P_TRANSFER,
               status: TransactionStatus.PENDING,
               senderWalletId: dto.senderWalletId,
-              recipientWalletId: dto.recipientWalletId,
+              recipientWalletId: finalRecipientWalletId,
               amount: amount.toFixed(4),
               description: dto.description,
             },
@@ -88,11 +111,11 @@ export class TransferService {
           });
 
           // CREDIT: Increase recipient balance (stored as positive)
-          const recipientBalance = await this.calculateBalanceInTx(tx, dto.recipientWalletId);
+          const recipientBalance = await this.calculateBalanceInTx(tx, finalRecipientWalletId!);
           const recipientNewBalance = recipientBalance.plus(amount);
           await tx.ledgerEntry.create({
             data: {
-              walletId: dto.recipientWalletId,
+              walletId: finalRecipientWalletId!,
               transactionId: transaction.id,
               entryType: EntryType.CREDIT,
               amount: amount.toFixed(4), // Positive for credit

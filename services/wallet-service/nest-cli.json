@@ -1,5 +1,5 @@
 {
-  "collection": "wallet-service",
+  "collection": "@nestjs/schematics",
   "entryPoints": ["src/main.ts"],
   "compilerOptions": {
     "deleteOutDir": true

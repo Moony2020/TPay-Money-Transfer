@@ -16,6 +16,7 @@ export class WalletController {
   @UseGuards(JwtAuthGuard)
   @Get('me')
   async getMe(@GetUser() user: any) {
+    console.log('>>> [WalletController] getMe hit for userId:', user?.sub);
     return this.walletService.getOrCreateWalletByUserId(user?.sub);
   }
 

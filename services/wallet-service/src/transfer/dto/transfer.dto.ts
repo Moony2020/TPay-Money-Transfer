@@ -10,8 +10,12 @@ export class P2PTransferDto {
   senderWalletId!: string;
 
   @IsUUID()
-  @IsNotEmpty()
-  recipientWalletId!: string;
+  @IsOptional()
+  recipientWalletId?: string;
+
+  @IsString()
+  @IsOptional()
+  recipientPhone?: string;
 
   @IsNumber()
   @Min(0.0001)
