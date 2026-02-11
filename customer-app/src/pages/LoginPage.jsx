@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import Logo from '../components/Logo';
+import { telemetry } from '../api/client';
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -63,7 +64,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="page" style={{ background: '#FDFDFD' }}>
+    <div className="page" style={{ background: 'var(--bg-primary)' }}>
       {/* Header with Top-Left Logo and Bell icon */}
       <header className="page-header" style={{ borderBottom: 'none', background: 'transparent' }}>
         <Logo size="sm" />
@@ -100,12 +101,12 @@ export default function LoginPage() {
               </>
             ) : (
               <>
-                <h1 style={{ fontSize: '1.75rem', marginBottom: '8px', fontWeight: 500, color: '#1A1A1A' }}>
+                <h1 style={{ fontSize: '1.75rem', marginBottom: '8px', fontWeight: 500, color: 'var(--text-primary)' }}>
                   Enter Your <span style={{ fontWeight: 700 }}>PIN</span>
                 </h1>
                 <div 
                   onClick={() => setIsChangingPhone(true)}
-                  style={{ fontSize: '0.875rem', color: '#B93B33', marginBottom: '32px', cursor: 'pointer', fontWeight: 600 }}
+                  style={{ fontSize: '0.875rem', color: 'var(--primary)', marginBottom: '32px', cursor: 'pointer', fontWeight: 600 }}
                 >
                   {phone} <span style={{ fontSize: '0.75rem', opacity: 0.6 }}>(Change)</span>
                 </div>
@@ -120,7 +121,32 @@ export default function LoginPage() {
                   ))}
                 </div>
 
-                <button className="btn btn-ghost" style={{ fontSize: '0.875rem', color: '#888', fontWeight: 400 }}>
+                <button 
+                  className="btn-link" 
+                  style={{ 
+                    fontSize: '0.875rem', 
+                    color: 'var(--text-secondary)', 
+                    fontWeight: 400,
+                    width: 'fit-content',
+                    margin: '-6px auto 12px',
+                    padding: '10px 24px',
+                    border: 'none',
+                    background: 'none',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    display: 'block',
+                    transition: 'all 0.2s ease',
+                    opacity: 0.8
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = 'var(--bg-tertiary)';
+                    e.currentTarget.style.opacity = '1';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = 'none';
+                    e.currentTarget.style.opacity = '0.8';
+                  }}
+                >
                   Forgot PIN?
                 </button>
               </>
@@ -130,7 +156,7 @@ export default function LoginPage() {
           {!isChangingPhone && (
             <>
               <div className="pin-keypad mb-xl">
-                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 'back', 0, 'C'].map((key, i) => (
+                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 'back', 0, 'C'].map((key) => (
                   key === 'back' ? (
                     <button
                       key="backspace"
@@ -169,21 +195,50 @@ export default function LoginPage() {
 
               {/* Fingerprint Login */}
               <div className="text-center mb-lg">
-                <button className="flex-col flex-center btn-ghost" style={{ border: 'none', background: 'none', cursor: 'pointer', gap: '8px', margin: '0 auto' }}>
-                  <svg 
-                    viewBox="0 0 24 24" 
-                    fill="none" 
-                    stroke="#666" 
-                    strokeWidth="1.2" 
-                    style={{ width: 56, height: 56 }}
+                <div 
+                  className="flex-col flex-center" 
+                  style={{ cursor: 'pointer', margin: '0 auto', width: 'fit-content', marginTop: '12px' }}
+                  onClick={() => telemetry.log('biometric_clicked')}
+                >
+                  <button 
+                    className="flex-col flex-center btn-ghost" 
+                    style={{ 
+                      border: 'none', 
+                      background: 'none', 
+                      cursor: 'pointer', 
+                      padding: '8px 20px 8px 20px',
+                      borderRadius: '16px',
+                      transition: 'all 0.2s ease',
+                      marginBottom: '4px'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = 'var(--bg-tertiary)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = 'none';
+                    }}
+                    aria-label="Login with Biometrics"
                   >
-                    <path d="M11 12c0-1.657 1.343-3 3-3s3 1.343 3 3v2" />
-                    <path d="M11 15c0 1.657-1.343 3-3 3s-3-1.343-3-3v-4c0-3.314 2.686-6 6-6s6 2.686 6 6v4" />
-                    <path d="M7 15c0 2.209 1.791 4 4 4s4-1.791 4-4v-4c0-4.418 3.582-8 8-8" />
-                    <path d="M3 15c0 4.418 3.582 8 8 8s8-3.582 8-8v-4" />
-                  </svg>
-                  <span style={{ fontSize: '0.8125rem', fontWeight: 400, color: '#666' }}>Login with Touch ID</span>
-                </button>
+                    <svg 
+                      viewBox="0 0 24 24" 
+                      fill="none" 
+                      stroke="var(--text-muted)" 
+                      strokeWidth="1.5" 
+                      strokeLinecap="round" 
+                      strokeLinejoin="round" 
+                      style={{ width: 44, height: 44 }}
+                    >
+                      {/* Concentric Arcs - Symmetrical and Elongated */}
+                      <path d="M11 13v-1a1 1 0 0 1 2 0v2" />
+                      <path d="M8 15v-3a4 4 0 0 1 8 0v3" />
+                      <path d="M5 16v-4a7 7 0 0 1 14 0v4" />
+                      <path d="M2 17v-5a10 10 0 0 1 20 0v5" />
+                    </svg>
+                  </button>
+                  <span style={{ fontSize: '0.8125rem', fontWeight: 400, color: 'var(--text-secondary)', opacity: 0.9 }}>
+                    Login with Touch ID
+                  </span>
+                </div>
               </div>
             </>
           )}
@@ -205,10 +260,10 @@ export default function LoginPage() {
             style={{ 
               height: '56px', 
               fontSize: '1.125rem', 
-              background: '#B93B33',
+              background: 'var(--primary)',
               borderRadius: '12px',
               marginBottom: '16px',
-              boxShadow: '0 4px 12px rgba(185, 59, 51, 0.2)'
+              boxShadow: 'var(--shadow-lg)'
             }}
           >
             {isLoading ? (
@@ -220,9 +275,9 @@ export default function LoginPage() {
         </div>
 
         {/* Register Link */}
-        <p className="text-center text-small" style={{ color: '#666' }}>
+        <p className="text-center text-small" style={{ color: 'var(--text-secondary)' }}>
           Don't have an account?{' '}
-          <Link to="/register" style={{ color: '#B93B33', fontWeight: 600 }}>
+          <Link to="/register" style={{ color: 'var(--primary)', fontWeight: 600 }}>
             Sign Up
           </Link>
         </p>

@@ -90,6 +90,7 @@ export function AuthProvider({ children }) {
         const decoded = jwtDecode(result.access_token);
         setUser(mapTokenToUser(decoded));
         setIsAuthenticated(true);
+        localStorage.setItem('tpay_phone', phone);
         await refreshProfile();
         telemetry.log('login_success');
         return { success: true };
@@ -107,6 +108,7 @@ export function AuthProvider({ children }) {
   const register = async (phone, name, pin) => {
     try {
       await authService.register(phone, name, pin);
+      localStorage.setItem('tpay_phone', phone);
       telemetry.log('register_success');
       return { success: true };
     } catch (error) {
@@ -156,8 +158,27 @@ export function AuthProvider({ children }) {
     authService.logout();
     setUser(null);
     setIsAuthenticated(false);
-    localStorage.removeItem('tpay_phone');
     telemetry.log('logout');
+  };
+
+  const updateUserProfile = async (fullName, profileImage) => {
+    try {
+      const updatedProfile = await authService.updateProfile({ 
+        fullName, 
+        profileImageUrl: profileImage 
+      });
+      setUser((previousUser) =>
+        mapProfileToUser(updatedProfile, previousUser || {}),
+      );
+      telemetry.log('profile_updated');
+      return { success: true };
+    } catch (error) {
+      telemetry.log('profile_update_failed', { reason: error.message });
+      return {
+        success: false,
+        error: getErrorMessage(error, 'Failed to update profile'),
+      };
+    }
   };
 
   const value = {
@@ -170,6 +191,7 @@ export function AuthProvider({ children }) {
     refreshProfile,
     uploadProfileImage,
     removeProfileImage,
+    updateUserProfile,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

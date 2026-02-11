@@ -9,7 +9,7 @@ export default function PersonalInfoPage() {
   const fileInputRef = useRef(null);
   
   const [fullName, setFullName] = useState(user?.name || '');
-  const [profilePicture, setProfilePicture] = useState(user?.profilePicture || null);
+  const [profileImage, setProfileImage] = useState(user?.profileImage || null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
@@ -33,14 +33,14 @@ export default function PersonalInfoPage() {
     // Convert to base64
     const reader = new FileReader();
     reader.onloadend = () => {
-      setProfilePicture(reader.result);
+      setProfileImage(reader.result);
       setError(null);
     };
     reader.readAsDataURL(file);
   };
 
   const handleRemoveImage = () => {
-    setProfilePicture(null);
+    setProfileImage(null);
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
@@ -51,7 +51,7 @@ export default function PersonalInfoPage() {
     setError(null);
     setSuccess(false);
 
-    const result = await updateUserProfile(fullName, profilePicture);
+    const result = await updateUserProfile(fullName, profileImage);
     
     setIsLoading(false);
 
@@ -83,8 +83,8 @@ export default function PersonalInfoPage() {
               width: 100, 
               height: 100, 
               borderRadius: '50%', 
-              backgroundColor: profilePicture ? 'transparent' : 'var(--primary)',
-              backgroundImage: profilePicture ? `url(${profilePicture})` : 'none',
+              backgroundColor: profileImage ? 'transparent' : 'var(--primary)',
+              backgroundImage: profileImage ? `url(${profileImage})` : 'none',
               backgroundSize: 'cover',
               backgroundPosition: 'center',
               color: 'white',
@@ -96,7 +96,7 @@ export default function PersonalInfoPage() {
               fontWeight: 600,
               border: '3px solid var(--border)'
             }}>
-              {!profilePicture && (user?.name?.[0] || user?.phone?.[0] || 'U')}
+              {!profileImage && (user?.name?.[0] || user?.phone?.[0] || 'U')}
             </div>
             
             <button
@@ -130,7 +130,7 @@ export default function PersonalInfoPage() {
             style={{ display: 'none' }}
           />
 
-          {profilePicture && (
+          {profileImage && (
             <button
               className="btn btn-secondary mt-md"
               onClick={handleRemoveImage}

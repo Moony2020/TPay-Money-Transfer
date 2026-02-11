@@ -83,6 +83,36 @@
   /* --- Safe Areas (for notch/home indicator) --- */
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
+
+  /* --- Derived Surfaces --- */
+  --surface-card: var(--bg-primary);
+  --surface-input: var(--bg-secondary);
+}
+
+/* --- Dark Theme Variables --- */
+html.dark {
+  --primary: #D95A52; /* Softened Red */
+  --primary-light: #E2726B;
+  --primary-dark: #C94840;
+  
+  --bg-primary: #121214; /* Deep Charcoal */
+  --bg-secondary: #0A0A0B; /* Midnight Black */
+  --bg-tertiary: #1E1E20; /* Surface / Card */
+  
+  --surface-card: #1E1E20;
+  --surface-input: #161618;
+  
+  --text-primary: #EEEEF2; /* Soft White */
+  --text-secondary: #9CA3B0; /* Muted Blue-Gray */
+  --text-muted: #6B7280; /* Darker Gray */
+  
+  --border: #2A2A2C;
+  --border-focus: #D95A52;
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.6);
+  --shadow-card: 0 4px 12px rgba(0, 0, 0, 0.5);
 }
 
 /* --- Global Styles --- */
@@ -601,21 +631,21 @@ body {
   width: 100%;
   aspect-ratio: 1.3/1;
   border-radius: 14px;
-  background: #FFFFFF;
+  background: var(--bg-primary);
   border: none;
   font-size: 2rem;
   font-weight: 400;
-  color: #1A1A1A;
+  color: var(--text-primary);
   cursor: pointer;
   transition: all 0.2s ease;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+  box-shadow: var(--shadow-sm);
 }
 
 .pin-key:hover {
-  background: #F9F9F9;
+  background: var(--bg-tertiary);
 }
 
 .pin-key:active {
@@ -627,6 +657,16 @@ body {
 .pin-key.ghost {
   background: transparent;
   box-shadow: none;
+}
+
+/* Specific Dark Mode overrides for keypad to ensure depth */
+html.dark .pin-key {
+  background: var(--bg-tertiary);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+html.dark .pin-key:hover {
+  background: #252528;
 }
 
 /* --- Profile Menu Icons --- */
@@ -746,4 +786,496 @@ body {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+/* ===================================================
+   DARK MODE — Toggled via .dark class on <html>
+   Deep Charcoal / Dark Navy — Revolut / Wise inspired
+   =================================================== */
+
+.dark {
+  /* --- Core Palette --- */
+  --primary: #C94840;
+  --primary-light: #D95A52;
+  --primary-dark: #A33830;
+
+  --success: #34D399;
+  --success-light: #6EE7B7;
+  --warning: #FBBF24;
+  --danger: #F87171;
+
+  --text-primary: #EEEEF2;
+  --text-secondary: #9CA3B0;
+  --text-muted: #6B7280;
+
+  --bg-primary: #161622;
+  --bg-secondary: #111118;
+  --bg-tertiary: #1E1E2E;
+
+  --border: #2A2A3C;
+  --border-focus: #C94840;
+
+  /* --- Icon Accents --- */
+  --icon-plum: #A78BFA;
+  --icon-plum-soft: rgba(167, 139, 250, 0.15);
+  --icon-amber: #FBBF24;
+  --icon-amber-soft: rgba(251, 191, 36, 0.15);
+  --icon-mint: #34D399;
+  --icon-mint-soft: rgba(52, 211, 153, 0.15);
+  --icon-indigo: #A5B4FC;
+  --icon-indigo-soft: rgba(165, 180, 252, 0.15);
+  --icon-sky: #60A5FA;
+  --icon-sky-soft: rgba(96, 165, 250, 0.15);
+  --icon-slate: #94A3B8;
+  --icon-slate-soft: rgba(148, 163, 184, 0.15);
+  --icon-teal: #2DD4BF;
+  --icon-teal-soft: rgba(45, 212, 191, 0.15);
+  --icon-rose: #FB7185;
+  --icon-rose-soft: rgba(251, 113, 133, 0.15);
+  --icon-sage: #A3E635;
+  --icon-sage-soft: rgba(163, 230, 53, 0.15);
+
+  /* --- Shadows --- */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.35);
+  --shadow-lg: 0 10px 20px rgba(0, 0, 0, 0.4);
+  --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.25);
+}
+
+/* --- Body & Root --- */
+.dark body,
+html.dark body {
+  background: #0D0D14 !important;
+}
+
+html.dark #root {
+  background: #161622 !important;
+  box-shadow: none !important;
+}
+
+/* --- Pages with inline background (#FDFDFD etc) --- */
+html.dark .page {
+  background: #161622 !important;
+}
+
+/* --- Page Header --- */
+html.dark .page-header {
+  background: #161622 !important;
+  border-bottom-color: #2A2A3C !important;
+}
+
+/* --- Headings & text with inline color --- */
+html.dark h1,
+html.dark h2,
+html.dark h3,
+html.dark .text-title,
+html.dark .text-heading,
+html.dark .text-display {
+  color: #EEEEF2 !important;
+}
+
+html.dark .page-title {
+  color: #EEEEF2 !important;
+}
+
+html.dark .text-caption {
+  color: #9CA3B0 !important;
+}
+
+/* --- PIN Keypad --- */
+html.dark .pin-key {
+  background: #1E1E2E !important;
+  color: #EEEEF2 !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2) !important;
+}
+
+html.dark .pin-key:hover {
+  background: #252538 !important;
+}
+
+html.dark .pin-key:active {
+  background: #C94840 !important;
+  color: white !important;
+}
+
+html.dark .pin-key.ghost {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+/* --- PIN Dots --- */
+html.dark .pin-dot {
+  background: #3A3A50 !important;
+}
+
+html.dark .pin-dot.filled {
+  background: #9CA3B0 !important;
+}
+
+/* --- Inputs --- */
+html.dark .input {
+  background: #1E1E2E !important;
+  border-color: #2A2A3C !important;
+  color: #EEEEF2 !important;
+}
+
+html.dark .input:focus {
+  border-color: #C94840 !important;
+}
+
+html.dark .input::placeholder {
+  color: #6B7280 !important;
+}
+
+/* --- Cards --- */
+html.dark .card {
+  background: #1E1E2E !important;
+}
+
+/* --- Balance Card --- */
+html.dark .balance-card {
+  background: linear-gradient(135deg, #B93B33 0%, #7E2A24 100%) !important;
+}
+
+/* --- Quick Actions --- */
+html.dark .quick-action {
+  background: #1E1E2E !important;
+}
+
+html.dark .quick-action:hover {
+  background: #252538 !important;
+}
+
+html.dark .quick-action-label {
+  color: #9CA3B0 !important;
+}
+
+/* --- Transactions --- */
+html.dark .transaction-item {
+  border-bottom-color: #2A2A3C !important;
+}
+
+html.dark .transaction-item:hover {
+  background: #1E1E2E !important;
+}
+
+html.dark .transaction-title {
+  color: #EEEEF2 !important;
+}
+
+html.dark .transaction-subtitle {
+  color: #9CA3B0 !important;
+}
+
+html.dark .transaction-amount.debit {
+  color: #F87171 !important;
+}
+
+html.dark .transaction-amount.credit {
+  color: #34D399 !important;
+}
+
+html.dark .transaction-icon.credit {
+  background: rgba(52, 211, 153, 0.12) !important;
+  color: #34D399 !important;
+}
+
+html.dark .transaction-icon.debit {
+  background: rgba(248, 113, 113, 0.12) !important;
+  color: #F87171 !important;
+}
+
+/* --- Bottom Nav --- */
+html.dark .bottom-nav {
+  background: #161622 !important;
+  border-top-color: #2A2A3C !important;
+}
+
+html.dark .bottom-nav-item {
+  color: #6B7280 !important;
+}
+
+html.dark .bottom-nav-item.active {
+  color: #C94840 !important;
+}
+
+html.dark .bottom-nav-item:hover {
+  color: #EEEEF2 !important;
+}
+
+/* --- Buttons --- */
+html.dark .btn-secondary {
+  background: #1E1E2E !important;
+  color: #EEEEF2 !important;
+}
+
+html.dark .btn-secondary:hover:not(:disabled) {
+  background: #252538 !important;
+}
+
+html.dark .btn-ghost {
+  color: #C94840 !important;
+}
+
+html.dark .btn-ghost:hover:not(:disabled) {
+  background: #1E1E2E !important;
+}
+
+/* --- Loading --- */
+html.dark .loading-overlay {
+  background: rgba(22, 22, 34, 0.92) !important;
+}
+
+html.dark .loading-spinner {
+  border-color: #2A2A3C !important;
+  border-top-color: #C94840 !important;
+}
+
+html.dark .skeleton {
+  background: linear-gradient(90deg, #1E1E2E 25%, #2A2A3C 50%, #1E1E2E 75%) !important;
+  background-size: 200% 100% !important;
+}
+
+/* --- BackButton (inline styles override) --- */
+html.dark button[aria-label="Go back"] {
+  background: #1E1E2E !important;
+  border-color: #2A2A3C !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2) !important;
+}
+
+html.dark button[aria-label="Go back"] svg {
+  stroke: #EEEEF2 !important;
+}
+
+/* --- Logo "Pay" text (inline color override) --- */
+html.dark .logo-text-pay {
+  color: #EEEEF2 !important;
+}
+
+/* --- Profile Avatar --- */
+html.dark .profile-avatar-image {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+}
+
+html.dark .profile-avatar-action {
+  border-color: #161622 !important;
+}
+
+/* --- Menu Icons in Dark Mode --- */
+html.dark .menu-icon--plum { background: var(--icon-plum-soft) !important; color: var(--icon-plum) !important; }
+html.dark .menu-icon--amber { background: var(--icon-amber-soft) !important; color: var(--icon-amber) !important; }
+html.dark .menu-icon--mint { background: var(--icon-mint-soft) !important; color: var(--icon-mint) !important; }
+html.dark .menu-icon--indigo { background: var(--icon-indigo-soft) !important; color: var(--icon-indigo) !important; }
+html.dark .menu-icon--sky { background: var(--icon-sky-soft) !important; color: var(--icon-sky) !important; }
+html.dark .menu-icon--slate { background: var(--icon-slate-soft) !important; color: var(--icon-slate) !important; }
+html.dark .menu-icon--teal { background: var(--icon-teal-soft) !important; color: var(--icon-teal) !important; }
+html.dark .menu-icon--rose { background: var(--icon-rose-soft) !important; color: var(--icon-rose) !important; }
+html.dark .menu-icon--sage { background: var(--icon-sage-soft) !important; color: var(--icon-sage) !important; }
+html.dark .menu-icon--neutral { background: var(--bg-tertiary) !important; color: var(--text-secondary) !important; }
+
+/* --- Fingerprint stroke & muted text (LoginPage inline) --- */
+html.dark .fingerprint-icon {
+  stroke: #9CA3B0 !important;
+}
+
+html.dark .text-muted-inline {
+  color: #6B7280 !important;
+}
+
+html.dark .text-secondary-inline {
+  color: #9CA3B0 !important;
+}
+
+/* --- Links in dark mode --- */
+html.dark a {
+  color: inherit;
+}
+
+/* --- Bell icon on login header --- */
+html.dark .btn-ghost svg {
+  stroke: #9CA3B0 !important;
+}
+
+/* --- Scrollbar --- */
+html.dark ::-webkit-scrollbar {
+  width: 6px;
+}
+
+html.dark ::-webkit-scrollbar-track {
+  background: #161622;
+}
+
+html.dark ::-webkit-scrollbar-thumb {
+  background: #2A2A3C;
+  border-radius: 3px;
+}
+
+html.dark ::-webkit-scrollbar-thumb:hover {
+  background: #3A3A50;
+}
+
+/* --- Focus Visible --- */
+html.dark *:focus-visible {
+  outline-color: #C94840 !important;
+}
+
+/* --- OTP inputs (RegisterPage inline styles) --- */
+html.dark input[id^="otp-"] {
+  background: #1E1E2E !important;
+  border-color: #2A2A3C !important;
+  color: #EEEEF2 !important;
+}
+
+/* --- Buttons --- */
+html.dark .btn-primary {
+  background: var(--primary) !important;
+  color: #FFFFFF !important;
+}
+
+html.dark .btn-primary:hover:not(:disabled) {
+  background: var(--primary-light) !important;
+}
+
+html.dark .btn-secondary {
+  background: var(--bg-tertiary) !important;
+  color: var(--text-primary) !important;
+}
+
+html.dark .btn-secondary:hover:not(:disabled) {
+  background: #252528 !important;
+}
+
+html.dark .btn-ghost {
+  color: var(--text-primary) !important;
+}
+
+html.dark .btn-ghost:hover:not(:disabled) {
+  background: var(--bg-tertiary) !important;
+}
+
+/* --- Avatars / Circles & Dashboard Icons --- */
+/* Standardized avatar classes for reliable initials visibility */
+html.dark .avatar-circle,
+html.dark .avatar-circle-lg,
+html.dark .quick-action,
+html.dark .quick-action-icon,
+html.dark .quick-action svg,
+html.dark [class*="avatar"] div,
+html.dark [class*="avatar"] span {
+  color: #FFFFFF !important;
+  background-color: var(--bg-tertiary) !important;
+  stroke: #FFFFFF !important;
+}
+
+/* Dashboard icons force white stroke if currentColor */
+html.dark svg[stroke="currentColor"],
+html.dark svg [stroke="currentColor"] {
+  stroke: #FFFFFF !important;
+}
+
+html.dark .quick-action-label {
+  color: var(--text-secondary) !important;
+}
+
+/* Force Light Gray for Menu Badges (excluding Success colors) & Chevrons */
+html.dark .flex-between.w-full span[style*="font-size: 0.75rem"]:not([style*="success"]),
+html.dark .flex-between.w-full span[style*="color: var(--text-muted)"] {
+  color: var(--text-secondary) !important;
+}
+
+/* --- Generic text and body colors --- */
+html.dark .text-body,
+html.dark .text-small,
+html.dark .text-title,
+html.dark .text-heading,
+html.dark .text-display,
+html.dark p:not(.balance-label) {
+  color: var(--text-primary) !important;
+}
+
+/* --- Profile Section Spacing --- */
+.text-caption {
+  margin-top: 12px; /* Restored breathing room for light mode */
+  margin-bottom: 4px;
+}
+
+html.dark .text-caption {
+  color: var(--text-secondary) !important;
+  margin-top: 4px; /* Maintain the dark mode spacing they liked */
+}
+
+/* --- Sign Out / Danger Button --- */
+html.dark .btn-danger {
+  background: var(--primary) !important;
+  color: #FFFFFF !important;
+  opacity: 1 !important;
+  box-shadow: 0 4px 12px rgba(217, 90, 82, 0.3) !important;
+}
+
+html.dark .btn-danger:hover {
+  background: var(--primary-light) !important;
+}
+
+/* --- Generic inline color overrides for dark --- */
+html.dark [style*="color: #1A1A1A"],
+html.dark [style*="color: rgb(26, 26, 26)"],
+html.dark [style*="color: #333"],
+html.dark [style*="color: rgb(51, 51, 51)"],
+html.dark [style*="color: #000"],
+html.dark [style*="color: black"],
+html.dark [style*="color: rgb(0, 0, 0)"] {
+  color: #EEEEF2 !important;
+}
+
+html.dark [style*="color: #666"],
+html.dark [style*="color: rgb(102, 102, 102)"] {
+  color: #9CA3B0 !important;
+}
+
+html.dark [style*="color: #888"],
+html.dark [style*="color: rgb(136, 136, 136)"],
+html.dark [style*="color: var(--text-muted)"] {
+  color: #6B7280 !important;
+}
+
+html.dark [style*="background: #FDFDFD"],
+html.dark [style*="background-color: #FDFDFD"],
+html.dark [style*="background: #fff"],
+html.dark [style*="background-color: #fff"] {
+  background: #161622 !important;
+}
+
+/* --- Toggle Switch Styles --- */
+.theme-toggle {
+  position: relative;
+  width: 48px;
+  height: 26px;
+  border-radius: 13px;
+  background: #D1D5DB;
+  border: none;
+  cursor: pointer;
+  transition: background 0.3s ease;
+  flex-shrink: 0;
+  padding: 0;
+}
+
+.theme-toggle.active {
+  background: #C94840;
+}
+
+.theme-toggle::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: white;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+  transition: transform 0.3s ease;
+}
+
+.theme-toggle.active::after {
+  transform: translateX(22px);
 }

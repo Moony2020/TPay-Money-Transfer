@@ -218,7 +218,7 @@ export default function RegisterPage() {
             )}
 
             <div className="pin-keypad mb-lg">
-              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 'back', 0, 'C'].map((key, i) => (
+              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 'back', 0, 'C'].map((key) => (
                 key === 'back' ? (
                   <button
                     key="backspace"

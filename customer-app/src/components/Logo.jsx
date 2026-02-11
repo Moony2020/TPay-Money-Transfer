@@ -29,6 +29,7 @@ export default function Logo({ size = "md", showText = true }) {
 
       {showText && (
         <span
+          className="logo-text-pay"
           style={{
             fontSize: currentSize.font,
             fontWeight: 800,

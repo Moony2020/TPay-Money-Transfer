@@ -143,16 +143,19 @@ export default function SendMoney() {
                       setRecipientName(name);
                     }}
                   >
-                    <div style={{ 
-                      width: 48, 
-                      height: 48, 
-                      borderRadius: '50%', 
-                      background: 'var(--bg-tertiary)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: '1.25rem'
-                    }}>
+                    <div 
+                      className="avatar-circle"
+                      style={{ 
+                        width: 48, 
+                        height: 48, 
+                        borderRadius: '50%', 
+                        background: 'var(--bg-tertiary)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '1.25rem'
+                      }}
+                    >
                       {name[0]}
                     </div>
                     <span className="text-caption">{name}</span>
@@ -182,18 +185,21 @@ export default function SendMoney() {
             <div className="page-content">
               {/* Recipient Card */}
               <div className="card mb-lg flex gap-md" style={{ alignItems: 'center' }}>
-                <div style={{ 
-                  width: 48, 
-                  height: 48, 
-                  borderRadius: '50%', 
-                  background: 'var(--primary)',
-                  color: 'white',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: '1.25rem',
-                  fontWeight: 600
-                }}>
+                <div 
+                  className="avatar-circle"
+                  style={{ 
+                    width: 48, 
+                    height: 48, 
+                    borderRadius: '50%', 
+                    background: 'var(--primary)',
+                    color: 'white',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '1.25rem',
+                    fontWeight: 600
+                  }}
+                >
                   {recipientName[0]}
                 </div>
                 <div>

@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { ThemeProvider } from './context/ThemeContext';
 import BottomNav from './components/BottomNav';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
@@ -7,6 +8,7 @@ import WalletDashboard from './pages/WalletDashboard';
 import SendMoney from './pages/SendMoney';
 import TransactionHistory from './pages/TransactionHistory';
 import ProfilePage from './pages/ProfilePage';
+import PersonalInfoPage from './pages/PersonalInfoPage';
 import './index.css';
 
 // Protected Route Wrapper
@@ -100,6 +102,14 @@ function AppRoutes() {
           </ProtectedRoute>
         } 
       />
+      <Route
+        path="/profile/personal-info"
+        element={
+          <ProtectedRoute>
+            <PersonalInfoPage />
+          </ProtectedRoute>
+        }
+      />
 
       {/* Default Redirect */}
       <Route path="/" element={<Navigate to="/home" replace />} />
@@ -111,9 +121,11 @@ function AppRoutes() {
 export default function App() {
   return (
     <BrowserRouter>
-      <AuthProvider>
-        <AppRoutes />
-      </AuthProvider>
+      <ThemeProvider>
+        <AuthProvider>
+          <AppRoutes />
+        </AuthProvider>
+      </ThemeProvider>
     </BrowserRouter>
   );
 }

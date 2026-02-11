@@ -1,10 +1,13 @@
 import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import BackButton from '../components/BackButton';
 
 const MAX_IMAGE_SIZE_BYTES = 2 * 1024 * 1024;
 const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+
+
 
 function getUserInitial(user) {
   const fullName = user?.name?.trim();
@@ -31,6 +34,7 @@ export default function ProfilePage() {
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
   const { user, logout, uploadProfileImage, removeProfileImage } = useAuth();
+  const { isDark, toggleTheme } = useTheme();
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [isRemovingImage, setIsRemovingImage] = useState(false);
@@ -114,7 +118,7 @@ export default function ProfilePage() {
           icon: '\u{1F464}',
           iconTone: 'plum',
           label: 'Personal Information',
-          action: () => {},
+          action: () => navigate('/profile/personal-info'),
         },
         {
           icon: '\u{1F512}',
@@ -166,9 +170,8 @@ export default function ProfilePage() {
           icon: '\u{1F319}',
           iconTone: 'slate',
           label: 'Dark Mode',
-          badge: 'Phase 2',
-          badgeColor: 'var(--text-muted)',
-          action: () => {},
+          toggle: true,
+          action: () => toggleTheme(),
         },
         {
           icon: '\u{1F310}',
@@ -297,59 +300,74 @@ export default function ProfilePage() {
         </div>
 
         {menuSections.map((section, sectionIndex) => (
-          <div key={sectionIndex} className="mb-lg">
-            <p className="text-caption mb-sm" style={{ paddingLeft: '4px' }}>
+          <div key={sectionIndex} className="mb-sm">
+            <p className="text-caption" style={{ paddingLeft: '4px' }}>
               {section.title}
             </p>
             <div className="card" style={{ padding: 0 }}>
-              {section.items.map((item, itemIndex) => (
-                <button
-                  key={itemIndex}
-                  className="flex-between w-full"
-                  onClick={item.action}
-                  style={{
-                    background: 'none',
-                    border: 'none',
-                    padding: '16px',
-                    borderBottom:
-                      itemIndex < section.items.length - 1
-                        ? '1px solid var(--border)'
-                        : 'none',
-                    cursor: 'pointer',
-                    textAlign: 'left',
-                  }}
-                >
-                  <span className="flex gap-md" style={{ alignItems: 'center' }}>
-                    <span
-                      className={`menu-icon menu-icon--${item.iconTone || 'neutral'}`}
-                    >
-                      <span className="menu-icon-emoji" aria-hidden="true">
-                        {item.icon}
-                      </span>
-                    </span>
-                    <span className="text-body">{item.label}</span>
-                  </span>
-                  <span className="flex gap-sm" style={{ alignItems: 'center' }}>
-                    {item.badge && (
+              {section.items.map((item, itemIndex) => {
+                const isToggleItem = !!item.toggle;
+                const RowComponent = isToggleItem ? 'div' : 'button';
+                
+                return (
+                  <RowComponent
+                    key={itemIndex}
+                    className="flex-between w-full"
+                    onClick={item.action}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      padding: '16px',
+                      borderBottom:
+                        itemIndex < section.items.length - 1
+                          ? '1px solid var(--border)'
+                          : 'none',
+                      cursor: 'pointer',
+                      textAlign: 'left',
+                    }}
+                  >
+                    <span className="flex gap-md" style={{ alignItems: 'center' }}>
                       <span
-                        style={{
-                          fontSize: '0.75rem',
-                          color: item.badgeColor,
-                          fontWeight: 500,
-                        }}
+                        className={`menu-icon menu-icon--${item.iconTone || 'neutral'}`}
                       >
-                        {item.badge}
+                        <span className="menu-icon-emoji" aria-hidden="true">
+                          {item.icon}
+                        </span>
                       </span>
-                    )}
-                    <span style={{ color: 'var(--text-muted)' }}>{'>'}</span>
-                  </span>
-                </button>
-              ))}
+                      <span className="text-body">{item.label}</span>
+                    </span>
+                    <span className="flex gap-sm" style={{ alignItems: 'center' }}>
+                      {isToggleItem ? (
+                        <button
+                          className={`theme-toggle ${isDark ? 'active' : ''}`}
+                          aria-label="Toggle dark mode"
+                          onClick={(e) => { e.stopPropagation(); toggleTheme(); }}
+                        />
+                      ) : (
+                        <>
+                          {item.badge && (
+                            <span
+                              style={{
+                                fontSize: '0.75rem',
+                                color: item.badgeColor,
+                                fontWeight: 500,
+                              }}
+                            >
+                              {item.badge}
+                            </span>
+                          )}
+                          <span style={{ color: 'var(--text-muted)' }}>{'>'}</span>
+                        </>
+                      )}
+                    </span>
+                  </RowComponent>
+                );
+              })}
             </div>
           </div>
         ))}
 
-        <button className="btn btn-danger mb-lg" onClick={() => setShowLogoutConfirm(true)}>
+        <button className="btn btn-danger mt-lg mb-lg" onClick={() => setShowLogoutConfirm(true)}>
           Sign Out
         </button>
 

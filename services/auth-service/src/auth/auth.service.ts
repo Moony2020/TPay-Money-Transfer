@@ -6,7 +6,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { SignupDto, LoginDto } from './dto/auth.dto';
+import { SignupDto, LoginDto, UpdateProfileDto } from './dto/auth.dto';
 import * as argon2 from 'argon2';
 import { JwtService } from '@nestjs/jwt';
 
@@ -101,6 +101,35 @@ export class AuthService {
     }
 
     return user;
+  }
+
+  async updateProfile(userId: string, dto: UpdateProfileDto) {
+    const data: any = {};
+
+    if (dto.fullName !== undefined) {
+      data.fullName = dto.fullName;
+    }
+
+    if (dto.profileImageUrl !== undefined) {
+      if (dto.profileImageUrl) {
+        this.validateProfileImage(dto.profileImageUrl);
+      }
+      data.profileImageUrl = dto.profileImageUrl;
+    }
+
+    const updatedUser = await this.prisma.user.update({
+      where: { id: userId },
+      data,
+      select: {
+        id: true,
+        phoneNumber: true,
+        fullName: true,
+        kycTier: true,
+        profileImageUrl: true,
+      },
+    });
+
+    return updatedUser;
   }
 
   async updateProfileImage(userId: string, imageData: string) {

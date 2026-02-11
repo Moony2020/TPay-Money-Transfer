@@ -1,10 +1,22 @@
 import {
   IsNotEmpty,
+  IsOptional,
   IsString,
   Matches,
   MaxLength,
   MinLength,
 } from 'class-validator';
+
+export class UpdateProfileDto {
+  @IsString()
+  @IsOptional()
+  fullName?: string;
+
+  @IsString()
+  @IsOptional()
+  @MaxLength(4_000_000, { message: 'Image payload is too large' })
+  profileImageUrl?: string;
+}
 
 export class SignupDto {
   @IsString()

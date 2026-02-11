@@ -140,6 +140,12 @@ export const authService = {
     return response.data;
   },
 
+  // Update profile details (name, picture)
+  updateProfile: async (data) => {
+    const response = await authApi.patch('/profile', data);
+    return response.data;
+  },
+
   // Logout
   logout: () => {
     tokenManager.clear();
