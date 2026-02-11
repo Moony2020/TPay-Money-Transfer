@@ -10,6 +10,22 @@
   padding: 0;
 }
 
+[dir="rtl"] {
+  text-align: right;
+}
+
+[dir="rtl"] .flex-between {
+  flex-direction: row-reverse;
+}
+
+[dir="rtl"] .flex {
+  flex-direction: row-reverse;
+}
+
+[dir="rtl"] .page-header .back-button {
+  transform: rotate(180deg);
+}
+
 :root {
   /* --- Color Palette (Red Banking Theme) --- */
   --primary: #B93B33;

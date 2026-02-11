@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
+import { useLanguage } from '../context/LanguageContext';
 import BackButton from '../components/BackButton';
 
 const MAX_IMAGE_SIZE_BYTES = 2 * 1024 * 1024;
@@ -35,6 +36,7 @@ export default function ProfilePage() {
   const fileInputRef = useRef(null);
   const { user, logout, uploadProfileImage, removeProfileImage } = useAuth();
   const { isDark, toggleTheme } = useTheme();
+  const { t, currentLanguage } = useLanguage();
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [isRemovingImage, setIsRemovingImage] = useState(false);
@@ -112,95 +114,104 @@ export default function ProfilePage() {
 
   const menuSections = [
     {
-      title: 'Account',
+      title: t('profile.account') || 'Account',
       items: [
         {
           icon: '\u{1F464}',
           iconTone: 'plum',
-          label: 'Personal Information',
+          label: t('profile.personalInfo'),
           action: () => navigate('/profile/personal-info'),
         },
         {
           icon: '\u{1F512}',
           iconTone: 'amber',
-          label: 'Security & PIN',
+          label: t('profile.security'),
           action: () => {},
         },
         {
           icon: '\u{1F4CB}',
           iconTone: 'mint',
-          label: 'KYC Status',
-          badge: 'Verified',
+          label: t('profile.kyc'),
+          badge: t('profile.verified'),
           badgeColor: 'var(--success)',
           action: () => {},
         },
       ],
     },
     {
-      title: 'Linked Accounts',
+      title: t('profile.linkedAccounts') || 'Linked Accounts',
       items: [
         {
           icon: '\u{1F3E6}',
           iconTone: 'indigo',
-          label: 'Bank Accounts',
-          badge: 'Coming Soon',
+          label: t('profile.bankAccounts'),
+          badge: t('profile.comingSoon'),
           badgeColor: 'var(--text-muted)',
           action: () => {},
         },
         {
           icon: '\u{1F4F1}',
           iconTone: 'sky',
-          label: 'Mobile Money',
-          badge: 'Coming Soon',
+          label: t('profile.mobileMoney'),
+          badge: t('profile.comingSoon'),
           badgeColor: 'var(--text-muted)',
           action: () => {},
         },
       ],
     },
     {
-      title: 'Preferences',
+      title: t('profile.preferences') || 'Preferences',
       items: [
         {
           icon: '\u{1F514}',
           iconTone: 'amber',
-          label: 'Notifications',
-          action: () => {},
+          label: t('profile.notifications'),
+          action: () => navigate('/profile/notifications'),
         },
         {
           icon: '\u{1F319}',
           iconTone: 'slate',
-          label: 'Dark Mode',
+          label: t('profile.darkMode'),
           toggle: true,
           action: () => toggleTheme(),
         },
         {
           icon: '\u{1F310}',
           iconTone: 'teal',
-          label: 'Language',
-          badge: 'English',
-          action: () => {},
+          label: t('profile.language'),
+          badge: (
+            <span className="flex gap-xs" style={{ alignItems: 'center' }}>
+              <img 
+                src={`https://flagcdn.com/w40/${currentLanguage?.region}.png`} 
+                alt="" 
+                style={{ width: 16, height: 12, borderRadius: 2, objectFit: 'cover' }} 
+              />
+              {currentLanguage?.name || 'English'}
+            </span>
+          ),
+          action: () => navigate('/profile/language'),
         },
       ],
     },
     {
-      title: 'Support',
+      title: t('profile.support') || 'Support',
       items: [
         {
           icon: '\u{1F198}',
           iconTone: 'sky',
-          label: 'Help Center',
+          label: t('profile.helpCenter'),
           action: () => {},
         },
         {
           icon: '\u{1F4AC}',
           iconTone: 'rose',
-          label: 'Contact Support',
+          label: t('profile.contactSupport'),
           action: () => {},
         },
         {
           icon: '\u{1F4C4}',
           iconTone: 'sage',
-          label: 'Terms & Privacy',
+          label: t('profile.termsPrivacy'),
           action: () => {},
         },
       ],
@@ -211,7 +222,7 @@ export default function ProfilePage() {
     <div className="page">
       <header className="page-header">
         <BackButton />
-        <h1 className="page-title">Profile</h1>
+        <h1 className="page-title">{t('profile.title')}</h1>
         <div style={{ width: 40 }} />
       </header>
 
@@ -259,7 +270,7 @@ export default function ProfilePage() {
                 display: 'block',
               }}
             >
-              {isRemovingImage ? 'Removing...' : 'Remove Photo'}
+              {isRemovingImage ? t('common.loading') : t('profile.removePhoto') || 'Remove Photo'}
             </button>
           )}
 
@@ -294,7 +305,7 @@ export default function ProfilePage() {
                 fontWeight: 500,
               }}
             >
-              Verified
+              {t('profile.verified')}
             </span>
           </div>
         </div>
@@ -323,7 +334,7 @@ export default function ProfilePage() {
                           ? '1px solid var(--border)'
                           : 'none',
                       cursor: 'pointer',
-                      textAlign: 'left',
+                      textAlign: 'inherit',
                     }}
                   >
                     <span className="flex gap-md" style={{ alignItems: 'center' }}>
@@ -368,7 +379,7 @@ export default function ProfilePage() {
         ))}
 
         <button className="btn btn-danger mt-lg mb-lg" onClick={() => setShowLogoutConfirm(true)}>
-          Sign Out
+          {t('profile.signOut')}
         </button>
 
         <p className="text-center text-caption">tPay v1.0.0 (Sprint 3)</p>
@@ -389,7 +400,7 @@ export default function ProfilePage() {
               textAlign: 'center',
             }}
           >
-            <h2 className="text-title mb-md">Sign Out?</h2>
+            <h2 className="text-title mb-md">{t('profile.signOut')}?</h2>
             <p className="text-body mb-lg" style={{ color: 'var(--text-secondary)' }}>
               Are you sure you want to sign out of your account?
             </p>
@@ -398,10 +409,10 @@ export default function ProfilePage() {
                 className="btn btn-secondary"
                 onClick={() => setShowLogoutConfirm(false)}
               >
-                Cancel
+                {t('common.cancel')}
               </button>
               <button className="btn btn-danger" onClick={handleLogout}>
-                Sign Out
+                {t('profile.signOut')}
               </button>
             </div>
           </div>

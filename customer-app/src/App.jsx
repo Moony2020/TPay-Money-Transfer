@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
+import { LanguageProvider } from './context/LanguageContext';
 import BottomNav from './components/BottomNav';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
@@ -9,6 +10,8 @@ import SendMoney from './pages/SendMoney';
 import TransactionHistory from './pages/TransactionHistory';
 import ProfilePage from './pages/ProfilePage';
 import PersonalInfoPage from './pages/PersonalInfoPage';
+import LanguageSettingsPage from './pages/LanguageSettingsPage';
+import NotificationsSettingsPage from './pages/NotificationsSettingsPage';
 import './index.css';
 
 // Protected Route Wrapper
@@ -110,6 +113,22 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       />
+      <Route
+        path="/profile/language"
+        element={
+          <ProtectedRoute>
+            <LanguageSettingsPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/profile/notifications"
+        element={
+          <ProtectedRoute>
+            <NotificationsSettingsPage />
+          </ProtectedRoute>
+        }
+      />
 
       {/* Default Redirect */}
       <Route path="/" element={<Navigate to="/home" replace />} />
@@ -122,9 +141,11 @@ export default function App() {
   return (
     <BrowserRouter>
       <ThemeProvider>
-        <AuthProvider>
-          <AppRoutes />
-        </AuthProvider>
+        <LanguageProvider>
+          <AuthProvider>
+            <AppRoutes />
+          </AuthProvider>
+        </LanguageProvider>
       </ThemeProvider>
     </BrowserRouter>
   );
