@@ -2,10 +2,11 @@ import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import BackButton from '../components/BackButton';
+import { telemetry } from '../api/client';
 
 export default function PersonalInfoPage() {
   const navigate = useNavigate();
-  const { user, updateUserProfile } = useAuth();
+  const { user, updateUserProfile, removeProfileImage: removeImage } = useAuth();
   const fileInputRef = useRef(null);
   
   const [fullName, setFullName] = useState(user?.name || '');
@@ -39,10 +40,24 @@ export default function PersonalInfoPage() {
     reader.readAsDataURL(file);
   };
 
-  const handleRemoveImage = () => {
-    setProfileImage(null);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
+  const handleRemoveImage = async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const result = await removeImage();
+      if (result.success) {
+        setProfileImage(null);
+        if (fileInputRef.current) {
+          fileInputRef.current.value = '';
+        }
+      } else {
+        setError(result.error || 'Failed to remove image');
+      }
+    } catch (error) {
+      telemetry.error(error, { context: 'remove_image_personal_info' });
+      setError('An error occurred while removing the image');
+    } finally {
+      setIsLoading(false);
     }
   };
 

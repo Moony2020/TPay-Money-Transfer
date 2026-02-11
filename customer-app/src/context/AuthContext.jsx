@@ -81,6 +81,15 @@ export function AuthProvider({ children }) {
       setIsLoading(false);
     };
     checkAuth();
+
+    // Sync state when window is focused (for cross-tab/browser consistency)
+    const handleFocus = () => {
+      if (tokenManager.getToken()) {
+        refreshProfile();
+      }
+    };
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
   }, [refreshProfile]);
 
   const login = async (phone, pin) => {
