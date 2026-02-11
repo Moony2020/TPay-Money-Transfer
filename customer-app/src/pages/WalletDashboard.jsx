@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 import { walletService, telemetry } from '../api/client';
 
 // Icons (inline SVGs for simplicity)
@@ -43,24 +44,18 @@ const ArrowDownIcon = () => (
 
 export default function WalletDashboard() {
   const { user } = useAuth();
+  const { t, langCode } = useLanguage();
   const [balance, setBalance] = useState(null);
   const [transactions, setTransactions] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    loadWalletData();
-  }, []);
-
-  const loadWalletData = async () => {
+  const loadWalletData = useCallback(async () => {
     try {
       setIsLoading(true);
       setError(null);
       
-      // Fetch user's wallet
       const wallet = await walletService.getMyWallet();
-      
-      // Fetch balance and history in parallel
       const [balanceData, historyData] = await Promise.all([
         walletService.getBalance(wallet.id),
         walletService.getHistory(wallet.id, { limit: 5 })
@@ -72,30 +67,32 @@ export default function WalletDashboard() {
         lastUpdated: new Date()
       });
       
-      // Map API response to UI model
       const mappedTransactions = historyData.data.map(entry => ({
         id: entry.id,
-        type: entry.entryType.toLowerCase(), // 'credit' or 'debit'
-        title: entry.transaction.description || (entry.entryType === 'CREDIT' ? 'Received' : 'Sent'),
+        type: entry.entryType.toLowerCase(),
+        title: entry.transaction.description || (entry.entryType === 'CREDIT' ? t('history.received') : t('history.sent')),
         subtitle: entry.transaction.type.replace('_', ' '),
         amount: Math.abs(parseFloat(entry.amount)),
-        date: new Date(entry.createdAt).toLocaleDateString()
+        date: new Date(entry.createdAt).toLocaleDateString(langCode === 'ar' ? 'ar-SA' : 'en-US')
       }));
 
       setTransactions(mappedTransactions);
-      
       telemetry.log('dashboard_loaded', { walletId: wallet.id });
     } catch (err) {
       console.error('Dashboard load error:', err);
-      setError('Failed to load wallet data. Please try again.');
+      setError(t('common.error') + ': Failed to load wallet data');
       telemetry.error(err, { context: 'dashboard_load' });
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [langCode, t]);
+
+  useEffect(() => {
+    loadWalletData();
+  }, [loadWalletData]);
 
   const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('en-SS', {
+    return new Intl.NumberFormat(langCode === 'ar' ? 'ar-SA' : 'en-SS', {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2
     }).format(amount);
@@ -114,10 +111,10 @@ export default function WalletDashboard() {
       <div className="page">
         <div className="error-state">
           <div className="error-icon">⚠️</div>
-          <h2 className="error-title">Something went wrong</h2>
+          <h2 className="error-title">{t('common.error')}</h2>
           <p className="error-message">{error}</p>
           <button className="btn btn-primary" onClick={loadWalletData}>
-            Try Again
+            {t('common.tryAgain')}
           </button>
         </div>
       </div>
@@ -126,11 +123,10 @@ export default function WalletDashboard() {
 
   return (
     <div className="page">
-      {/* Header */}
       <header className="page-header">
         <div>
-          <p className="text-caption">Good morning,</p>
-          <p className="text-title">Welcome back, {user?.name?.split(' ')[0] || 'User'}! 👋</p>
+          <p className="text-caption">{t('wallet.greeting')}</p>
+          <p className="text-title">{t('wallet.welcomeBack')} {user?.name?.split(' ')[0] || 'User'}! 👋</p>
         </div>
         <button className="btn btn-ghost" style={{ width: 'auto', padding: '8px' }}>
           🔔
@@ -138,43 +134,40 @@ export default function WalletDashboard() {
       </header>
 
       <div className="page-content">
-        {/* Balance Card */}
         <div className="balance-card mb-lg">
-          <p className="balance-label">Available Balance</p>
+          <p className="balance-label">{t('wallet.availableBalance')}</p>
           <p className="balance-amount">
             {formatCurrency(balance?.available || 0)}
             <span className="balance-currency">{balance?.currency || 'SSP'}</span>
           </p>
-          <p className="text-caption" style={{ opacity: 0.7, marginTop: '8px' }}>
-            Updated just now
+          <p className="text-caption" style={{ color: 'rgba(255, 255, 255, 0.7)', marginTop: '8px' }}>
+            {t('common.updatedNow')}
           </p>
         </div>
 
-        {/* Quick Actions */}
         <div className="quick-actions mb-lg">
           <Link to="/send" className="quick-action" style={{ textDecoration: 'none' }}>
             <SendIcon />
-            <span className="quick-action-label">Send</span>
+            <span className="quick-action-label">{t('wallet.quickActions.send')}</span>
           </Link>
           <button className="quick-action">
             <ReceiveIcon />
-            <span className="quick-action-label">Receive</span>
+            <span className="quick-action-label">{t('wallet.quickActions.receive')}</span>
           </button>
           <button className="quick-action">
             <ScanIcon />
-            <span className="quick-action-label">Scan QR</span>
+            <span className="quick-action-label">{t('wallet.quickActions.scan')}</span>
           </button>
           <button className="quick-action">
             <MoreIcon />
-            <span className="quick-action-label">More</span>
+            <span className="quick-action-label">{t('wallet.quickActions.more')}</span>
           </button>
         </div>
 
-        {/* Recent Transactions */}
         <div className="flex-between mb-md">
-          <h2 className="text-title">Recent Transactions</h2>
+          <h2 className="text-title">{t('wallet.recentTransactions')}</h2>
           <Link to="/history" className="btn btn-ghost" style={{ width: 'auto', padding: '8px 12px', fontSize: '0.875rem' }}>
-            See All
+            {t('wallet.seeAll')}
           </Link>
         </div>
 
@@ -182,7 +175,7 @@ export default function WalletDashboard() {
           <div className="transaction-list">
             {transactions.length === 0 ? (
               <div className="empty-state">
-                <p>No transactions yet</p>
+                <p>{t('wallet.noTransactions')}</p>
               </div>
             ) : (
               transactions.map((tx) => (

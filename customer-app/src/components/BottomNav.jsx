@@ -1,4 +1,5 @@
 import { NavLink } from 'react-router-dom';
+import { useLanguage } from '../context/LanguageContext';
 
 // Bottom Navigation Icons
 const HomeIcon = () => (
@@ -28,28 +29,32 @@ const ProfileIcon = () => (
   </svg>
 );
 
-const navItems = [
-  { to: '/home', icon: HomeIcon, label: 'Home' },
-  { to: '/history', icon: HistoryIcon, label: 'History' },
-  { to: '/send', icon: SendIcon, label: 'Send' },
-  { to: '/profile', icon: ProfileIcon, label: 'Profile' },
-];
-
 export default function BottomNav() {
+  const { t } = useLanguage();
+
+  const navItems = [
+    { to: '/home', icon: HomeIcon, label: t('nav.home') },
+    { to: '/history', icon: HistoryIcon, label: t('nav.history') },
+    { to: '/send', icon: SendIcon, label: t('nav.send') },
+    { to: '/profile', icon: ProfileIcon, label: t('nav.profile') },
+  ];
+
   return (
     <nav className="bottom-nav" aria-label="Main navigation">
       <div className="bottom-nav-items">
-        {navItems.map(({ to, icon: Icon, label }) => (
-          <NavLink
-            key={to}
-            to={to}
-            className={({ isActive }) => `bottom-nav-item ${isActive ? 'active' : ''}`}
-          >
-            <Icon className="bottom-nav-icon" />
-
-            <span className="bottom-nav-label">{label}</span>
-          </NavLink>
-        ))}
+        {navItems.map((item) => {
+          const Icon = item.icon;
+          return (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              className={({ isActive }) => `bottom-nav-item ${isActive ? 'active' : ''}`}
+            >
+              <Icon className="bottom-nav-icon" />
+              <span className="bottom-nav-label">{item.label}</span>
+            </NavLink>
+          );
+        })}
       </div>
     </nav>
   );

@@ -63,12 +63,12 @@ export default function ProfilePage() {
     }
 
     if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
-      setImageError('Only JPG, PNG, WEBP, and GIF images are supported.');
+      setImageError(t('profile.imageTypeSmall'));
       return;
     }
 
     if (file.size > MAX_IMAGE_SIZE_BYTES) {
-      setImageError('Image must be 2 MB or smaller.');
+      setImageError(t('profile.imageSizeSmall'));
       return;
     }
 
@@ -85,9 +85,9 @@ export default function ProfilePage() {
         return;
       }
 
-      setImageSuccessMessage('Profile photo updated.');
+      setImageSuccessMessage(t('profile.imageUpdateSuccess'));
     } catch (error) {
-      setImageError(error.message || 'Unable to upload image');
+      setImageError(error.message || t('common.error'));
     } finally {
       setIsUploadingImage(false);
     }
@@ -104,9 +104,9 @@ export default function ProfilePage() {
         setImageError(result.error);
         return;
       }
-      setImageSuccessMessage('Profile photo removed.');
+      setImageSuccessMessage(t('profile.imageRemoveSuccess'));
     } catch (error) {
-      setImageError(error.message || 'Unable to remove image');
+      setImageError(error.message || t('profile.imageRemoveError'));
     } finally {
       setIsRemovingImage(false);
     }
@@ -114,7 +114,7 @@ export default function ProfilePage() {
 
   const menuSections = [
     {
-      title: t('profile.account') || 'Account',
+      title: t('profile.account'),
       items: [
         {
           icon: '\u{1F464}',
@@ -139,7 +139,7 @@ export default function ProfilePage() {
       ],
     },
     {
-      title: t('profile.linkedAccounts') || 'Linked Accounts',
+      title: t('profile.linkedAccounts'),
       items: [
         {
           icon: '\u{1F3E6}',
@@ -160,7 +160,7 @@ export default function ProfilePage() {
       ],
     },
     {
-      title: t('profile.preferences') || 'Preferences',
+      title: t('profile.preferences'),
       items: [
         {
           icon: '\u{1F514}',
@@ -194,7 +194,7 @@ export default function ProfilePage() {
       ],
     },
     {
-      title: t('profile.support') || 'Support',
+      title: t('profile.support'),
       items: [
         {
           icon: '\u{1F198}',
@@ -247,7 +247,7 @@ export default function ProfilePage() {
               className="profile-avatar-action"
               onClick={handleSelectImageClick}
               disabled={isUploadingImage}
-              aria-label={isUploadingImage ? 'Uploading photo...' : 'Change profile photo'}
+              aria-label={isUploadingImage ? t('common.loading') : t('profile.personalInfo')}
             />
           </div>
 
@@ -270,7 +270,7 @@ export default function ProfilePage() {
                 display: 'block',
               }}
             >
-              {isRemovingImage ? t('common.loading') : t('profile.removePhoto') || 'Remove Photo'}
+              {isRemovingImage ? t('common.loading') : t('profile.removePhoto')}
             </button>
           )}
 
@@ -402,7 +402,7 @@ export default function ProfilePage() {
           >
             <h2 className="text-title mb-md">{t('profile.signOut')}?</h2>
             <p className="text-body mb-lg" style={{ color: 'var(--text-secondary)' }}>
-              Are you sure you want to sign out of your account?
+              {t('profile.signOutConfirm')}
             </p>
             <div className="flex gap-sm">
               <button

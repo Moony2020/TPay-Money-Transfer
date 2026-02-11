@@ -1,9 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
+import { useLanguage } from '../context/LanguageContext';
 import { walletService, telemetry } from '../api/client';
 import BackButton from '../components/BackButton';
 
 export default function TransactionHistory() {
+  const { t, langCode } = useLanguage();
   const [transactions, setTransactions] = useState([]);
   const [filter, setFilter] = useState('all'); // all, sent, received
   const [isLoading, setIsLoading] = useState(true);
@@ -20,7 +22,7 @@ export default function TransactionHistory() {
       const mapped = history.data.map(entry => ({
         id: entry.id,
         type: entry.entryType.toLowerCase(),
-        title: entry.transaction.description || (entry.entryType === 'CREDIT' ? 'Received' : 'Sent'),
+        title: entry.transaction.description || (entry.entryType === 'CREDIT' ? t('history.received') : t('history.sent')),
         subtitle: entry.transaction.type.replace('_', ' '),
         amount: Math.abs(parseFloat(entry.amount)),
         date: entry.createdAt,
@@ -38,21 +40,19 @@ export default function TransactionHistory() {
       telemetry.log('history_loaded', { filter, count: filtered.length });
     } catch (err) {
       console.error('History load error:', err);
-      setError('Failed to load transaction history');
+      setError(t('history.empty'));
       telemetry.error(err, { context: 'history_load' });
     } finally {
       setIsLoading(false);
     }
-  }, [filter]);
+  }, [filter, t]);
 
   useEffect(() => {
     loadTransactions();
   }, [loadTransactions]);
 
-
-
   const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('en-SS', {
+    return new Intl.NumberFormat(langCode === 'ar' ? 'ar-SA' : 'en-SS', {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2
     }).format(amount);
@@ -64,12 +64,14 @@ export default function TransactionHistory() {
     const yesterday = new Date(today);
     yesterday.setDate(yesterday.getDate() - 1);
 
+    const timeStr = date.toLocaleTimeString(langCode === 'ar' ? 'ar-SA' : 'en-US', { hour: '2-digit', minute: '2-digit' });
+
     if (date.toDateString() === today.toDateString()) {
-      return 'Today, ' + date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+      return (langCode === 'sv' ? 'Idag' : langCode === 'ar' ? 'اليوم' : langCode === 'fr' ? 'Aujourd\'hui' : langCode === 'es' ? 'Hoy' : 'Today') + ', ' + timeStr;
     } else if (date.toDateString() === yesterday.toDateString()) {
-      return 'Yesterday, ' + date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+      return (langCode === 'sv' ? 'Igår' : langCode === 'ar' ? 'أمس' : langCode === 'fr' ? 'Hier' : langCode === 'es' ? 'Ayer' : 'Yesterday') + ', ' + timeStr;
     } else {
-      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      return date.toLocaleDateString(langCode === 'ar' ? 'ar-SA' : 'en-US', { month: 'short', day: 'numeric' });
     }
   };
 
@@ -109,23 +111,22 @@ export default function TransactionHistory() {
     <div className="page">
       <header className="page-header">
         <BackButton />
-        <h1 className="page-title">Transactions</h1>
+        <h1 className="page-title">{t('history.title')}</h1>
         <button 
           className="btn btn-ghost"
           onClick={exportToCSV}
           style={{ width: 'auto', padding: '8px', fontSize: '0.875rem' }}
-          aria-label="Export transactions"
+          aria-label={t('history.export')}
         >
           ⬇️
         </button>
       </header>
 
-      {/* Filter Tabs */}
       <div className="flex gap-sm p-md" style={{ borderBottom: '1px solid var(--border)' }}>
         {[
-          { value: 'all', label: 'All' },
-          { value: 'received', label: 'Received' },
-          { value: 'sent', label: 'Sent' }
+          { value: 'all', label: t('history.all') },
+          { value: 'received', label: t('history.received') },
+          { value: 'sent', label: t('history.sent') }
         ].map(({ value, label }) => (
           <button
             key={value}
@@ -147,13 +148,13 @@ export default function TransactionHistory() {
           <div className="error-state">
             <p className="error-message">{error}</p>
             <button className="btn btn-primary" onClick={loadTransactions}>
-              Try Again
+              {t('common.tryAgain')}
             </button>
           </div>
         ) : transactions.length === 0 ? (
           <div className="empty-state">
             <div className="empty-icon">📭</div>
-            <p>No transactions found</p>
+            <p>{t('history.empty')}</p>
           </div>
         ) : (
           <div className="transaction-list">
@@ -176,7 +177,7 @@ export default function TransactionHistory() {
                     {tx.type === 'credit' ? '+' : '-'}{formatCurrency(tx.amount)}
                   </p>
                   <p className="text-caption" style={{ color: 'var(--success)', fontSize: '0.625rem' }}>
-                    {tx.status === 'COMMITTED' ? '✓ Complete' : tx.status}
+                    {tx.status === 'COMMITTED' ? `✓ ${t('history.complete')}` : tx.status}
                   </p>
                 </div>
               </Link>
