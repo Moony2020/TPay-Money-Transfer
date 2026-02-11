@@ -1,0 +1,7 @@
+{
+  "collection": "wallet-service",
+  "entryPoints": ["src/main.ts"],
+  "compilerOptions": {
+    "deleteOutDir": true
+  }
+}

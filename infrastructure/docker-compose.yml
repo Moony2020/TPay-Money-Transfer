@@ -1,0 +1,33 @@
+services:
+  tpay-db:
+    image: postgres:15-alpine
+    container_name: tpay-db
+    environment:
+      POSTGRES_USER: tpay_admin
+      POSTGRES_PASSWORD: tpay_password_secure
+      POSTGRES_DB: tpay_ledger
+    ports:
+      - "5433:5432"
+    volumes:
+      - tpay-db-data:/var/lib/postgresql/data
+
+  tpay-mongo:
+    image: mongo:6.0
+    container_name: tpay-mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: admin_password_secure
+    ports:
+      - "27017:27017"
+    volumes:
+      - tpay-mongo-data:/data/db
+
+  tpay-redis:
+    image: redis:7.0-alpine
+    container_name: tpay-redis
+    ports:
+      - "6379:6379"
+
+volumes:
+  tpay-db-data:
+  tpay-mongo-data:

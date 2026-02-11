@@ -1,0 +1,40 @@
+// Prisma schema for Identity Core (Auth Service)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id               String   @id @default(uuid()) @db.Uuid
+  phoneNumber      String   @unique @map("phone_number")
+  hashedPin        String   @map("hashed_pin")
+  fullName         String?  @map("full_name")
+  profileImageUrl  String?  @map("profile_image_url")
+  isActive         Boolean  @default(true) @map("is_active")
+  kycTier          Int      @default(0) @map("kyc_tier")
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+  
+  identityAuditLogs IdentityAuditLog[]
+
+  @@map("users")
+}
+
+model IdentityAuditLog {
+  id            String   @id @default(uuid()) @db.Uuid
+  userId        String?  @db.Uuid @map("user_id")
+  action        String
+  previousState Json?    @map("previous_state")
+  newState      Json?    @map("new_state")
+  actorId       String?  @db.Uuid @map("actor_id")
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  user User? @relation(fields: [userId], references: [id])
+
+  @@map("identity_audit_logs")
+}

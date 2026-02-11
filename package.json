@@ -1,0 +1,26 @@
+{
+  "name": "tpay",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "db:up": "cd infrastructure && docker-compose up -d",
+    "db:down": "cd infrastructure && docker-compose down",
+    "db:push": "cd services/auth-service && npx prisma db push",
+    "dev:stop": "powershell -NoProfile -ExecutionPolicy Bypass -File ./scripts/stop-dev-processes.ps1",
+    "dev:auth": "cd services/auth-service && npm run dev",
+    "dev:wallet": "cd services/wallet-service && npx dotenv-cli -e .env -- npx ts-node src/main.ts",
+    "dev:dashboard": "cd dashboard && npm run dev",
+    "dev:customer": "cd customer-app && npm run dev",
+    "dev:services": "concurrently \"npm run dev:auth\" \"npm run dev:wallet\" \"npm run dev:dashboard\" \"npm run dev:customer\"",
+    "dev": "npm run db:up && npm run dev:stop && npm run dev:services",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
+}
