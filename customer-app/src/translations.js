@@ -115,6 +115,12 @@ export const translations = {
       securityAlerts: 'Security Alerts',
       promoNotifications: 'Promo Notifications',
       updates: 'App Updates'
+    },
+    receive: {
+      title: 'Receive Money',
+      instruction: 'Show this QR code to the sender or share your phone number below.',
+      share: 'Share Details',
+      copied: 'Copied to clipboard!'
     }
   },
   sv: {
@@ -225,6 +231,12 @@ export const translations = {
       securityAlerts: 'Säkerhetsvarningar',
       promoNotifications: 'Kampanjer',
       updates: 'App-uppdateringar'
+    },
+    receive: {
+      title: 'Ta emot pengar',
+      instruction: 'Visa denna QR-kod för avsändaren eller dela ditt telefonnummer nedan.',
+      share: 'Dela uppgifter',
+      copied: 'Kopierat till urklipp!'
     }
   },
   ar: {
@@ -335,6 +347,12 @@ export const translations = {
       securityAlerts: 'تنبيهات الأمان',
       promoNotifications: 'العروض الترويجية',
       updates: 'تحديثات التطبيق'
+    },
+    receive: {
+      title: 'استلام الأموال',
+      instruction: 'أظهر رمز QR هذا للمرسل أو شارك رقم هاتفك أدناه.',
+      share: 'مشاركة التفاصيل',
+      copied: 'تم النسخ إلى الحافظة!'
     }
   },
   fr: {
@@ -445,6 +463,12 @@ export const translations = {
       securityAlerts: 'Alertes de sécurité',
       promoNotifications: 'Promotions',
       updates: 'Mises à jour'
+    },
+    receive: {
+      title: 'Recevoir de l\'argent',
+      instruction: 'Montrez ce code QR à l\'expéditeur ou partagez votre numéro de téléphone ci-dessous.',
+      share: 'Partager les détails',
+      copied: 'Copié dans le presse-papiers !'
     }
   },
   es: {
@@ -555,6 +579,12 @@ export const translations = {
       securityAlerts: 'Alertas de seguridad',
       promoNotifications: 'Promociones',
       updates: 'Actualizaciones'
+    },
+    receive: {
+      title: 'Recibir dinero',
+      instruction: 'Muestra este código QR al remitente o comparte tu número de teléfono a continuación.',
+      share: 'Compartir detalles',
+      copied: '¡Copiado al portapapeles!'
     }
   }
 };

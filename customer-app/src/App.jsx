@@ -11,6 +11,7 @@ import SendMoney from './pages/SendMoney';
 import TransactionHistory from './pages/TransactionHistory';
 import ProfilePage from './pages/ProfilePage';
 import PersonalInfoPage from './pages/PersonalInfoPage';
+import ReceiveMoney from './pages/ReceiveMoney';
 import LanguageSettingsPage from './pages/LanguageSettingsPage';
 import NotificationsSettingsPage from './pages/NotificationsSettingsPage';
 import DevTools from './pages/DevTools';
@@ -81,6 +82,14 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <SendMoney />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/receive" 
+        element={
+          <ProtectedRoute>
+            <ReceiveMoney />
           </ProtectedRoute>
         } 
       />

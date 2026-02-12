@@ -173,10 +173,10 @@ export default function WalletDashboard() {
             <SendIcon />
             <span className="quick-action-label">{t('wallet.quickActions.send')}</span>
           </Link>
-          <button className="quick-action">
+          <Link to="/receive" className="quick-action" style={{ textDecoration: 'none' }}>
             <ReceiveIcon />
             <span className="quick-action-label">{t('wallet.quickActions.receive')}</span>
-          </button>
+          </Link>
           <button className="quick-action">
             <ScanIcon />
             <span className="quick-action-label">{t('wallet.quickActions.scan')}</span>
