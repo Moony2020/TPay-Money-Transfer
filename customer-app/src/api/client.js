@@ -195,6 +195,24 @@ export const walletService = {
   getReceipt: async (transactionId) => {
     const response = await walletApi.get(`/transfers/${transactionId}/receipt`);
     return response.data;
+  },
+
+  // DEV Faucet
+  requestFaucet: async (amount) => {
+    const response = await walletApi.post('/dev/faucet', { 
+      amount: parseFloat(amount),
+      currency: 'SSP'
+    });
+    return response.data;
+  },
+
+  // ADMIN Adjust Balance
+  adminAdjustBalance: async (walletId, amount, reason, adminKey) => {
+    const response = await walletApi.post(`/admin/wallets/${walletId}/adjust`, 
+      { amount: parseFloat(amount), reason },
+      { headers: { 'admin-key': adminKey } }
+    );
+    return response.data;
   }
 };
 

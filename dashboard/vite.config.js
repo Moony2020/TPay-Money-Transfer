@@ -7,10 +7,15 @@ export default defineConfig({
     port: 3000,
     strictPort: true,
     proxy: {
-      '/api': {
+      '/api/auth': {
         target: 'http://127.0.0.1:3001',
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, '')
+        rewrite: (path) => path.replace(/^\/api\/auth/, '/auth')
+      },
+      '/api/wallet': {
+        target: 'http://127.0.0.1:3002',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/wallet/, '')
       }
     }
   }

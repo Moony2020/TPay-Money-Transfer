@@ -2,11 +2,13 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import { walletService, telemetry } from '../api/client';
+import { useNotification } from '../context/NotificationContext';
 import BackButton from '../components/BackButton';
 
 export default function SendMoney() {
   const navigate = useNavigate();
   const { t, langCode } = useLanguage();
+  const { notify } = useNotification();
   const [step, setStep] = useState(1); // 1: Recipient, 2: Amount, 3: Confirm, 4: Success
   const [senderWallet, setSenderWallet] = useState(null);
   const [recipient, setRecipient] = useState('');
@@ -15,6 +17,7 @@ export default function SendMoney() {
   const [description, setDescription] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [balance, setBalance] = useState(0);
   const [transactionResult, setTransactionResult] = useState(null);
 
   useEffect(() => {
@@ -22,6 +25,10 @@ export default function SendMoney() {
       try {
         const wallet = await walletService.getMyWallet();
         setSenderWallet(wallet);
+        
+        // Also fetch balance immediately
+        const balanceData = await walletService.getBalance(wallet.id);
+        setBalance(parseFloat(balanceData.available));
       } catch (err) {
         console.error('Failed to fetch wallet:', err);
         setError(t('common.error') + ': Could not load wallet');
@@ -43,26 +50,85 @@ export default function SendMoney() {
     setError('');
 
     if (step === 1) {
-      if (!recipient || recipient.length < 9) {
-        setError('Please enter a valid phone number');
+      setError('');
+      console.log('>>> [SendMoney] handleNext Step 1 hit, recipient:', recipient);
+      
+      let digits = recipient.replace(/[^\d+]/g, '');
+      if (!digits) {
+        setError('Please enter a phone number');
         return;
       }
-      const cleanPhone = recipient.replace(/[\s-]/g, '');
-      if (!cleanPhone.startsWith('+211')) {
-        setError('Phone number must start with +211');
+      
+      if (!digits.startsWith('+')) {
+        if (digits.startsWith('211')) digits = '+' + digits;
+        else if (digits.startsWith('0')) digits = '+211' + digits.substring(1);
+        else digits = '+211' + digits;
+      }
+
+      if (digits.length < 10) {
+        setError('Phone number is too short');
         return;
       }
 
+      setRecipient(digits);
       setRecipientName('Recipient'); 
       setStep(2);
     } else if (step === 2) {
-      if (!amount || parseFloat(amount) <= 0) {
-        setError('Please enter a valid amount');
+      const numAmount = parseFloat(amount);
+      if (!amount || numAmount <= 0) {
+        setError(t('send.enterValidAmount') || 'Please enter a valid amount');
         return;
       }
-      setStep(3);
+
+      // Final balance check before moving to confirm
+      setIsLoading(true);
+      try {
+        const balanceData = await walletService.getBalance(senderWallet.id);
+        const currentBalance = parseFloat(balanceData.available);
+        setBalance(currentBalance);
+
+        if (numAmount > currentBalance) {
+          setError(`${t('send.insufficientFunds')}. ${t('send.available')}: ${formatCurrency(currentBalance)}`);
+          setIsLoading(false);
+          return;
+        }
+        setStep(3);
+      } catch {
+        setError(t('common.error'));
+      } finally {
+        setIsLoading(false);
+      }
     } else if (step === 3) {
       await executeTransfer();
+    }
+  };
+
+  const handleShare = async () => {
+    if (!transactionResult) return;
+    
+    const shareText = `tPay Transfer Successful!\n\nSent SSP ${formatCurrency(transactionResult.amount)} to ${transactionResult.recipient}.\n\nTransaction ID: ${transactionResult.id}`;
+    
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: 'tPay Transfer Receipt',
+          text: shareText,
+          url: window.location.origin
+        });
+        telemetry.log('receipt_shared', { method: 'web_share' });
+      } catch (err) {
+        console.error('Share failed:', err);
+      }
+    } else {
+      // Fallback: Copy to clipboard
+      try {
+        await navigator.clipboard.writeText(shareText);
+        notify('Receipt copied to clipboard!', 'success');
+        telemetry.log('receipt_shared', { method: 'clipboard' });
+      } catch (err) {
+        console.error('Clipboard failed:', err);
+        notify('Failed to copy receipt', 'error');
+      }
     }
   };
 
@@ -74,6 +140,7 @@ export default function SendMoney() {
 
     setIsLoading(true);
     try {
+      console.log('>>> [SendMoney] Executing transfer...');
       const result = await walletService.sendMoney(
         senderWallet.id,
         recipient.replace(/[\s-]/g, ''),
@@ -81,16 +148,18 @@ export default function SendMoney() {
         description || 'P2P Transfer'
       );
       
+      console.log('>>> [SendMoney] Transfer result:', result);
+
       setTransactionResult({
-        id: result.id,
-        status: result.status,
+        id: result.transaction?.id || result.id || 'N/A',
+        status: result.transaction?.status || result.status,
         amount: parseFloat(amount),
         recipient: recipientName,
         timestamp: new Date().toISOString()
       });
       
       setStep(4);
-      telemetry.log('transfer_success', { amount: parseFloat(amount), txId: result.id });
+      telemetry.log('transfer_success', { amount: parseFloat(amount), txId: result.transaction?.id || result.id });
     } catch (err) {
       console.error('Transfer error:', err);
       setError(err.response?.data?.message || t('common.error'));
@@ -184,6 +253,9 @@ export default function SendMoney() {
                     aria-label="Amount"
                   />
                 </div>
+                <p className="text-caption mt-sm" style={{ color: parseFloat(amount) > balance ? 'var(--error)' : 'var(--text-secondary)' }}>
+                  {t('send.available')}: SSP {formatCurrency(balance)}
+                </p>
                 {error && <p className="input-error-text mt-md">{error}</p>}
               </div>
 
@@ -212,8 +284,12 @@ export default function SendMoney() {
                 />
               </div>
 
-              <button className="btn btn-primary" onClick={handleNext} disabled={!amount || parseFloat(amount) <= 0}>
-                {t('send.review')}
+              <button 
+                className="btn btn-primary" 
+                onClick={handleNext} 
+                disabled={!amount || parseFloat(amount) <= 0 || parseFloat(amount) > balance || isLoading}
+              >
+                {isLoading ? <span className="loading-spinner" style={{ width: 20, height: 20 }} /> : t('send.review')}
               </button>
             </div>
           </>
@@ -277,8 +353,8 @@ export default function SendMoney() {
         return (
           <div className="page flex-center" style={{ background: 'var(--bg-primary)' }}>
             <div className="text-center p-lg">
-              <div style={{ width: 80, height: 80, borderRadius: '50%', background: 'var(--success)', margin: '0 auto 24px', display: 'flex', alignItems: 'center', justifyCenter: 'center' }}>
-                <span style={{ fontSize: '2.5rem', color: 'white' }}>✓</span>
+              <div style={{ width: 80, height: 80, borderRadius: '50%', background: 'var(--success)', margin: '0 auto 24px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ fontSize: '2.5rem', color: 'white', lineHeight: 1 }}>✓</span>
               </div>
               <h1 className="text-heading mb-sm">{t('send.success')}</h1>
               <p className="text-body mb-lg" style={{ color: 'var(--text-secondary)' }}>
@@ -289,7 +365,8 @@ export default function SendMoney() {
                 <p className="text-small" style={{ fontFamily: 'var(--font-mono)' }}>{transactionResult?.id}</p>
               </div>
               <button className="btn btn-primary mb-md" onClick={() => navigate('/home')}>{t('common.done')}</button>
-              <button className="btn btn-secondary" onClick={() => telemetry.log('receipt_shared')}>{t('send.share')}</button>
+              <button className="btn btn-secondary mb-md" onClick={handleShare}>{t('send.share')}</button>
+              {error && <p className="text-success text-small animate-fade-in">{error}</p>}
             </div>
           </div>
         );

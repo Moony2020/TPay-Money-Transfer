@@ -35,24 +35,43 @@ const Sidebar = () => (
 );
 
 const App = () => {
+  const [stats, setStats] = useState({ totalAccounts: 0, totalLiquidity: '0.00' });
+  const [transactions, setTransactions] = useState([]);
   const [health, setHealth] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  const adminKey = 'dev-admin-key-123';
+
+  const fetchData = async () => {
+    try {
+      const [healthRes, statsRes, txRes] = await Promise.all([
+        axios.get('/api/auth/health').catch(() => ({ data: null })), // auth health
+        axios.get('/api/wallet/admin/stats', { headers: { 'admin-key': adminKey } }),
+        axios.get('/api/wallet/admin/transactions', { headers: { 'admin-key': adminKey } })
+      ]);
+      
+      setHealth(healthRes.data || { version: '1.0.0' });
+      setStats(statsRes.data);
+      setTransactions(txRes.data);
+    } catch (err) {
+      console.error('Data fetch error:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const checkHealth = async () => {
-      try {
-        const response = await axios.get('/api');
-        setHealth(response.data);
-      } catch (err) {
-        setHealth(null);
-      } finally {
-        setLoading(false);
-      }
-    };
-    checkHealth();
-    const interval = setInterval(checkHealth, 15000);
+    fetchData();
+    const interval = setInterval(fetchData, 10000); // Refresh every 10s
     return () => clearInterval(interval);
   }, []);
+
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('en-SS', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    }).format(amount);
+  };
 
   return (
     <div className="dashboard-container">
@@ -87,7 +106,7 @@ const App = () => {
             </div>
             {health && (
               <div style={{ fontSize: 12, color: 'var(--text-dim)', marginTop: 10, display: 'flex', gap: 8 }}>
-                <span>API v{health.version}</span>
+                <span>API v{health.version || '1.0.0'}</span>
                 <span style={{ color: 'var(--glass-border)' }}>|</span>
                 <span>Latency: 24ms</span>
               </div>
@@ -105,8 +124,8 @@ const App = () => {
           </div>
           <div className="glass-card stat-card">
             <div className="stat-label">Wallet Liquidity</div>
-            <div className="stat-value">SSP 42.1M</div>
-            <div style={{ fontSize: 12, color: 'var(--text-dim)', marginTop: 8 }}>Verified across 1,280 accounts</div>
+            <div className="stat-value">SSP {formatCurrency(stats.totalLiquidity)}</div>
+            <div style={{ fontSize: 12, color: 'var(--text-dim)', marginTop: 8 }}>Verified across {stats.totalAccounts} accounts</div>
           </div>
         </section>
 
@@ -131,34 +150,33 @@ const App = () => {
               </tr>
             </thead>
             <tbody>
-              {[
-                { id: 'tx_7a39b201', type: 'Intra-Wallet', amount: '12,500.00', time: '14:22:45', status: 'Settled' },
-                { id: 'tx_8e12c192', type: 'Bank Settlement', amount: '850,000.00', time: '14:21:10', status: 'In-Flight' },
-                { id: 'tx_9b0021c3', type: 'Merchant QR', amount: '4,200.00', time: '14:18:55', status: 'Settled' },
-                { id: 'tx_1c22d344', type: 'P2P Transfer', amount: '2,000.00', time: '14:15:20', status: 'Settled' },
-                { id: 'tx_5f33e765', type: 'International', amount: '45,000.00', time: '14:12:00', status: 'Review' },
-              ].map((tx, i) => (
+              {transactions.map((tx, i) => (
                 <tr key={i}>
-                  <td style={{ padding: '18px 24px', fontFamily: 'monospace', color: 'var(--accent-primary)', fontSize: 13 }}>{tx.id}</td>
+                  <td style={{ padding: '18px 24px', fontFamily: 'monospace', color: 'var(--accent-primary)', fontSize: 13 }}>{tx.id.substring(0, 12)}...</td>
                   <td>{tx.type}</td>
-                  <td style={{ fontWeight: 600, color: tx.amount.includes('850') ? 'var(--accent-primary)' : 'inherit' }}>{tx.amount}</td>
+                  <td style={{ fontWeight: 600 }}>{formatCurrency(tx.amount)}</td>
                   <td style={{ color: 'var(--text-dim)', fontSize: 13 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                      <Clock size={12} /> {tx.time}
+                      <Clock size={12} /> {new Date(tx.committedAt).toLocaleTimeString()}
                     </div>
                   </td>
                   <td>
                     <span className="status-badge" style={{ 
-                      background: tx.status === 'Settled' ? 'rgba(16, 185, 129, 0.1)' : tx.status === 'Review' ? 'rgba(239, 68, 68, 0.1)' : 'rgba(245, 158, 11, 0.1)',
-                      color: tx.status === 'Settled' ? 'var(--success)' : tx.status === 'Review' ? 'var(--danger)' : 'var(--warning)',
+                      background: tx.status === 'COMMITTED' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(245, 158, 11, 0.1)',
+                      color: tx.status === 'COMMITTED' ? 'var(--success)' : 'var(--warning)',
                       fontSize: 10
                     }}>
-                      {tx.status === 'Settled' ? <CheckCircle2 size={10} /> : null}
-                      {tx.status}
+                      {tx.status === 'COMMITTED' ? <CheckCircle2 size={10} /> : null}
+                      {tx.status === 'COMMITTED' ? 'Settled' : tx.status}
                     </span>
                   </td>
                 </tr>
               ))}
+              {transactions.length === 0 && (
+                <tr>
+                  <td colSpan="5" style={{ padding: 40, textAlign: 'center', color: 'var(--text-dim)' }}>No recent transactions detected</td>
+                </tr>
+              )}
             </tbody>
           </table>
           <div style={{ padding: 16, textAlign: 'center', background: 'rgba(0,0,0,0.1)' }}>

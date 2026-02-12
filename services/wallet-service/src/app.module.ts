@@ -4,6 +4,8 @@ import { JwtModule } from '@nestjs/jwt';
 import { PrismaModule } from './prisma/prisma.module';
 import { WalletModule } from './wallet/wallet.module';
 import { TransferModule } from './transfer/transfer.module';
+import { DevModule } from './dev/dev.module';
+import { AdminModule } from './admin/admin.module';
 import { AppController } from './app.controller';
 
 @Module({
@@ -17,6 +19,8 @@ import { AppController } from './app.controller';
     PrismaModule,
     WalletModule,
     TransferModule,
+    DevModule,
+    AdminModule,
   ],
   controllers: [AppController],
 })

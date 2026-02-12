@@ -9,7 +9,7 @@
     "db:push": "cd services/auth-service && npx prisma db push",
     "dev:stop": "powershell -NoProfile -ExecutionPolicy Bypass -File ./scripts/stop-dev-processes.ps1",
     "dev:auth": "cd services/auth-service && npm run dev",
-    "dev:wallet": "cd services/wallet-service && npx dotenv-cli -e .env -- npx ts-node src/main.ts",
+    "dev:wallet": "cd services/wallet-service && npm run dev",
     "dev:dashboard": "cd dashboard && npm run dev",
     "dev:customer": "cd customer-app && npm run dev",
     "dev:services": "concurrently \"npm run dev:auth\" \"npm run dev:wallet\" \"npm run dev:dashboard\" \"npm run dev:customer\"",

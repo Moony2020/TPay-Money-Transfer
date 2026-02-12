@@ -73,7 +73,9 @@ export const translations = {
       confirmAndSend: 'Confirm & Send',
       success: 'Transfer Successful!',
       transactionId: 'Transaction ID',
-      share: 'Share Receipt'
+      share: 'Share Receipt',
+      available: 'Available balance',
+      insufficientFunds: 'Insufficient funds'
     },
     profile: {
       title: 'Profile',
@@ -181,7 +183,9 @@ export const translations = {
       confirmAndSend: 'Bekräfta & skicka',
       success: 'Överföringen lyckades!',
       transactionId: 'Transaktions-ID',
-      share: 'Dela kvitto'
+      share: 'Dela kvitto',
+      available: 'Tillgängligt saldo',
+      insufficientFunds: 'Otillräckliga medel'
     },
     profile: {
       title: 'Profil',
@@ -289,7 +293,9 @@ export const translations = {
       confirmAndSend: 'تأكيد وإرسال',
       success: 'تم التحويل بنجاح!',
       transactionId: 'رقم المعاملة',
-      share: 'مشاركة الإيصال'
+      share: 'مشاركة الإيصال',
+      available: 'الرصيد المتاح',
+      insufficientFunds: 'رصيد غير كافٍ'
     },
     profile: {
       title: 'الملف الشخصي',
@@ -397,7 +403,9 @@ export const translations = {
       confirmAndSend: 'Confirmer & Envoyer',
       success: 'Transfert réussi!',
       transactionId: 'ID de transaction',
-      share: 'Partager le reçu'
+      share: 'Partager le reçu',
+      available: 'Solde disponible',
+      insufficientFunds: 'Fonds insuffisants'
     },
     profile: {
       title: 'Profil',
@@ -505,7 +513,9 @@ export const translations = {
       confirmAndSend: 'Confirmar y Enviar',
       success: '¡Transferencia exitosa!',
       transactionId: 'ID de transacción',
-      share: 'Compartir recibo'
+      share: 'Compartir recibo',
+      available: 'Saldo disponible',
+      insufficientFunds: 'Fondos insuficientes'
     },
     profile: {
       title: 'Perfil',

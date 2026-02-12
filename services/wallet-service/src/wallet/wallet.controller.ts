@@ -16,8 +16,13 @@ export class WalletController {
   @UseGuards(JwtAuthGuard)
   @Get('me')
   async getMe(@GetUser() user: any) {
-    console.log('>>> [WalletController] getMe hit for userId:', user?.sub);
-    return this.walletService.getOrCreateWalletByUserId(user?.sub);
+    try {
+      console.log('>>> [WalletController] getMe hit for userId:', user?.sub);
+      return await this.walletService.getOrCreateWalletByUserId(user?.sub);
+    } catch (error) {
+      console.error('>>> [WalletController] CRITICAL ERROR IN getMe:', error);
+      throw error;
+    }
   }
 
   @Get(':id')

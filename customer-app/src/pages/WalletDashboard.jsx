@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import { walletService, telemetry } from '../api/client';
+import { useNotification } from '../context/NotificationContext';
 
 // Icons (inline SVGs for simplicity)
 const SendIcon = () => (
@@ -45,14 +46,16 @@ const ArrowDownIcon = () => (
 export default function WalletDashboard() {
   const { user } = useAuth();
   const { t, langCode } = useLanguage();
+  const { notify } = useNotification();
   const [balance, setBalance] = useState(null);
   const [transactions, setTransactions] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [lastTxId, setLastTxId] = useState(null);
 
-  const loadWalletData = useCallback(async () => {
+  const loadWalletData = useCallback(async (isPolling = false) => {
     try {
-      setIsLoading(true);
+      if (!isPolling) setIsLoading(true);
       setError(null);
       
       const wallet = await walletService.getMyWallet();
@@ -69,6 +72,7 @@ export default function WalletDashboard() {
       
       const mappedTransactions = historyData.data.map(entry => ({
         id: entry.id,
+        txId: entry.transactionId,
         type: entry.entryType.toLowerCase(),
         title: entry.transaction.description || (entry.entryType === 'CREDIT' ? t('history.received') : t('history.sent')),
         subtitle: entry.transaction.type.replace('_', ' '),
@@ -76,19 +80,38 @@ export default function WalletDashboard() {
         date: new Date(entry.createdAt).toLocaleDateString(langCode === 'ar' ? 'ar-SA' : 'en-US')
       }));
 
+      // Check for new incoming transactions during polling
+      if (isPolling && mappedTransactions.length > 0) {
+        const latest = mappedTransactions[0];
+        if (lastTxId && latest.txId !== lastTxId && latest.type === 'credit') {
+          notify(`${t('notifications.receivedMoney') || 'Received Money!'}: SSP ${latest.amount}`, 'received');
+        }
+      }
+
+      if (mappedTransactions.length > 0) {
+        setLastTxId(mappedTransactions[0].txId);
+      }
+
       setTransactions(mappedTransactions);
-      telemetry.log('dashboard_loaded', { walletId: wallet.id });
+      if (!isPolling) telemetry.log('dashboard_loaded', { walletId: wallet.id });
     } catch (err) {
       console.error('Dashboard load error:', err);
-      setError(t('common.error') + ': Failed to load wallet data');
+      if (!isPolling) setError(t('common.error') + ': Failed to load wallet data');
       telemetry.error(err, { context: 'dashboard_load' });
     } finally {
-      setIsLoading(false);
+      if (!isPolling) setIsLoading(false);
     }
-  }, [langCode, t]);
+  }, [langCode, t, lastTxId, notify]);
 
   useEffect(() => {
     loadWalletData();
+    
+    // Set up polling for new transactions
+    const interval = setInterval(() => {
+      loadWalletData(true);
+    }, 10000); // Every 10 seconds
+
+    return () => clearInterval(interval);
   }, [loadWalletData]);
 
   const formatCurrency = (amount) => {
@@ -158,10 +181,10 @@ export default function WalletDashboard() {
             <ScanIcon />
             <span className="quick-action-label">{t('wallet.quickActions.scan')}</span>
           </button>
-          <button className="quick-action">
+          <Link to="/dev-tools" className="quick-action" style={{ textDecoration: 'none' }}>
             <MoreIcon />
             <span className="quick-action-label">{t('wallet.quickActions.more')}</span>
-          </button>
+          </Link>
         </div>
 
         <div className="flex-between mb-md">

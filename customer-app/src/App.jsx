@@ -12,6 +12,8 @@ import ProfilePage from './pages/ProfilePage';
 import PersonalInfoPage from './pages/PersonalInfoPage';
 import LanguageSettingsPage from './pages/LanguageSettingsPage';
 import NotificationsSettingsPage from './pages/NotificationsSettingsPage';
+import DevTools from './pages/DevTools';
+import { NotificationProvider } from './context/NotificationContext';
 import './index.css';
 
 // Protected Route Wrapper
@@ -130,6 +132,15 @@ function AppRoutes() {
         }
       />
 
+      <Route
+        path="/dev-tools"
+        element={
+          <ProtectedRoute>
+            <DevTools />
+          </ProtectedRoute>
+        }
+      />
+
       {/* Default Redirect */}
       <Route path="/" element={<Navigate to="/home" replace />} />
       <Route path="*" element={<Navigate to="/home" replace />} />
@@ -143,7 +154,9 @@ export default function App() {
       <ThemeProvider>
         <LanguageProvider>
           <AuthProvider>
-            <AppRoutes />
+            <NotificationProvider>
+              <AppRoutes />
+            </NotificationProvider>
           </AuthProvider>
         </LanguageProvider>
       </ThemeProvider>
