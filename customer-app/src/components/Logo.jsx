@@ -1,6 +1,6 @@
 import React from "react";
 
-export default function Logo({ size = "md", showText = true }) {
+export default function Logo({ size = "md", showText = true, light = false }) {
   const sizes = {
     sm: { icon: 28, font: "1.25rem" },
     md: { icon: 40, font: "1.6rem" },
@@ -33,7 +33,7 @@ export default function Logo({ size = "md", showText = true }) {
           style={{
             fontSize: currentSize.font,
             fontWeight: 800,
-            color: "#1A1A1A",
+            color: light ? "#FFFFFF" : "#1A1A1A",
             fontFamily: '"Georgia", serif',
             fontStyle: "italic",
             letterSpacing: "-0.02em",

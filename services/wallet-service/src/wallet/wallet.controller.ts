@@ -17,7 +17,6 @@ export class WalletController {
   @Get('me')
   async getMe(@GetUser() user: any) {
     try {
-      console.log('>>> [WalletController] getMe hit for userId:', user?.sub);
       return await this.walletService.getOrCreateWalletByUserId(user?.sub);
     } catch (error) {
       console.error('>>> [WalletController] CRITICAL ERROR IN getMe:', error);
@@ -27,7 +26,6 @@ export class WalletController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    console.log('[WalletController] findOne hit, id:', id);
     return this.walletService.getWalletById(id);
   }
 

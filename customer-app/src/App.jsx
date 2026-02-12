@@ -5,6 +5,7 @@ import { LanguageProvider } from './context/LanguageContext';
 import BottomNav from './components/BottomNav';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
+import OnboardingPage from './pages/OnboardingPage';
 import WalletDashboard from './pages/WalletDashboard';
 import SendMoney from './pages/SendMoney';
 import TransactionHistory from './pages/TransactionHistory';
@@ -51,6 +52,10 @@ function AppRoutes() {
   return (
     <Routes>
       {/* Public Routes */}
+      <Route 
+        path="/onboarding" 
+        element={isAuthenticated ? <Navigate to="/home" replace /> : <OnboardingPage />} 
+      />
       <Route 
         path="/login" 
         element={isAuthenticated ? <Navigate to="/home" replace /> : <LoginPage />} 
@@ -142,8 +147,8 @@ function AppRoutes() {
       />
 
       {/* Default Redirect */}
-      <Route path="/" element={<Navigate to="/home" replace />} />
-      <Route path="*" element={<Navigate to="/home" replace />} />
+      <Route path="/" element={<Navigate to="/onboarding" replace />} />
+      <Route path="*" element={<Navigate to="/onboarding" replace />} />
     </Routes>
   );
 }

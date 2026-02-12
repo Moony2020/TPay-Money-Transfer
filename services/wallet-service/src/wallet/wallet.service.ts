@@ -6,9 +6,7 @@ import { TransactionType, TransactionStatus, EntryType } from '@prisma/client';
 
 @Injectable()
 export class WalletService {
-  constructor(private prisma: PrismaService) {
-    console.log('>>> [WalletService] Instance created successfully');
-  }
+  constructor(private prisma: PrismaService) {}
 
   async createWallet(dto: CreateWalletDto) {
     // Check if user already has a wallet
@@ -53,24 +51,20 @@ export class WalletService {
     }
 
     try {
-      console.log('>>> [WalletService] Finding/Creating wallet for userId:', userId);
       const existing = await this.prisma.wallet.findUnique({
         where: { userId },
       });
       
       if (existing) {
-        console.log('>>> [WalletService] Found existing wallet:', existing.id);
         return existing;
       }
-
-      console.log('>>> [WalletService] No wallet found, creating...');
+      
       const created = await this.prisma.wallet.create({
         data: {
           userId,
           currency: 'SSP',
         },
       });
-      console.log('>>> [WalletService] Created new wallet:', created.id);
       return created;
     } catch (error) {
       console.error('>>> [WalletService] CRITICAL ERROR in getOrCreateWalletByUserId:', error);
@@ -83,7 +77,6 @@ export class WalletService {
    * This is the ONLY source of truth for balance.
    */
   async getBalance(walletId: string): Promise<{ available: string; currency: string }> {
-    console.log('>>> [WalletService] getBalance hit for walletId:', walletId);
     const wallet = await this.getWalletById(walletId);
 
     // Get the most recent ledger entry for this wallet
@@ -94,7 +87,6 @@ export class WalletService {
 
     // If no entries exist, balance is 0
     const balance = latestEntry ? new Decimal(latestEntry.balance.toString()) : new Decimal(0);
-    console.log(`>>> [WalletService] Calculated balance for ${walletId}: ${balance.toFixed(4)}`);
 
     return {
       available: balance.toFixed(4),
