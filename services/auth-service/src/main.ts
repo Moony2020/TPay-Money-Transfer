@@ -22,7 +22,7 @@ async function bootstrap() {
   app.enableCors();
 
   const port = process.env.PORT || 3001;
-  await app.listen(port);
-  console.log(`tPay Auth Service running on: http://localhost:${port}`);
+  await app.listen(port, '0.0.0.0');
+  console.log(`tPay Auth Service running on: http://0.0.0.0:${port}`);
 }
 bootstrap();

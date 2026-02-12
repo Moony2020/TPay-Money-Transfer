@@ -3,12 +3,19 @@ import { Controller, Get } from '@nestjs/common';
 @Controller()
 export class AppController {
   @Get()
-  getHello() {
-    return {
-      status: 'success',
-      message: 'tPay Identity Core API is running',
-      version: '1.0.0',
-      timestamp: new Date().toISOString(),
+  home() {
+    return { 
+      status: 'success', 
+      service: 'tPay Identity Core API', 
+      status_code: 'running' 
+    };
+  }
+
+  @Get('health')
+  health() {
+    return { 
+      status: 'ok',
+      timestamp: new Date().toISOString()
     };
   }
 }
