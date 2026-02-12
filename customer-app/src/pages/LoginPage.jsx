@@ -64,9 +64,9 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="page" style={{ background: 'var(--bg-primary)' }}>
-      {/* Header with Top-Left Logo and Bell icon */}
-      <header className="page-header" style={{ borderBottom: 'none', background: 'transparent' }}>
+    <div className="page" style={{ background: 'var(--bg-primary)', paddingBottom: '12px' }}>
+      {/* Header with Top-Left Logo and Bell icon - Non-sticky */}
+      <header className="page-header" style={{ borderBottom: 'none', background: 'transparent', position: 'relative' }}>
         <Logo size="sm" />
         <button className="btn btn-ghost" style={{ width: 'auto', padding: '8px', color: '#B93B33' }}>
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

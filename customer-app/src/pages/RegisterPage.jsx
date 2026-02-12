@@ -262,9 +262,9 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="page" style={{ background: 'var(--bg-primary)' }}>
-      {/* Fixed Header with Logo */}
-      <header className="page-header" style={{ borderBottom: 'none', background: 'transparent' }}>
+    <div className="page" style={{ background: 'var(--bg-primary)', paddingBottom: '12px' }}>
+      {/* Fixed Header with Logo - Non-sticky */}
+      <header className="page-header" style={{ borderBottom: 'none', background: 'transparent', position: 'relative' }}>
         <Logo size="sm" />
         <div style={{ width: 40 }} />
       </header>
