@@ -5,7 +5,7 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
+import { PrismaService } from '../database/prisma.service';
 import { SignupDto, LoginDto, UpdateProfileDto } from './dto/auth.dto';
 import * as argon2 from 'argon2';
 import { JwtService } from '@nestjs/jwt';

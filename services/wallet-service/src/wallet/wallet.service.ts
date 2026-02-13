@@ -1,5 +1,5 @@
 ﻿import { Injectable, NotFoundException, ConflictException, BadRequestException, Logger } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
+import { PrismaService } from '../database/prisma.service';
 import { CreateWalletDto } from './dto/create-wallet.dto';
 import { Decimal } from 'decimal.js';
 import { TransactionType, TransactionStatus, EntryType } from '@prisma/client';

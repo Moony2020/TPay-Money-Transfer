@@ -4,7 +4,7 @@ import {
   ConflictException,
   InternalServerErrorException,
 } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
+import { PrismaService } from '../database/prisma.service';
 import { WalletService } from '../wallet/wallet.service';
 import { P2PTransferDto, MerchantPaymentDto } from './dto/transfer.dto';
 import { Decimal } from 'decimal.js';

@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
-import { PrismaModule } from './prisma/prisma.module';
+import { PrismaModule } from './database/prisma.module';
 import { WalletModule } from './wallet/wallet.module';
 import { TransferModule } from './transfer/transfer.module';
 import { DevModule } from './dev/dev.module';
