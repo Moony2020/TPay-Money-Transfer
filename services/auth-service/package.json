@@ -5,8 +5,8 @@
   "private": true,
   "scripts": {
     "build": "nest build",
-    "start": "ls -R dist && node dist/main.js",
-    "start:prod": "ls -R dist && node dist/main.js",
+    "start": "node dist/main.js",
+    "start:prod": "node dist/main.js",
     "dev": "nest start --watch",
     "test": "jest"
   },
