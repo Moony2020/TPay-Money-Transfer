@@ -43,6 +43,13 @@ const ArrowDownIcon = () => (
   </svg>
 );
 
+const getInitials = (name) => {
+  if (!name) return null;
+  const parts = name.split(' ').filter(p => p.length > 0);
+  if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+  return parts[0][0].toUpperCase();
+};
+
 export default function WalletDashboard() {
   const { user } = useAuth();
   const { t, langCode } = useLanguage();
@@ -87,7 +94,7 @@ export default function WalletDashboard() {
           amount: Math.abs(parseFloat(entry.amount)),
           date: new Date(entry.createdAt).toLocaleDateString(langCode === 'ar' ? 'ar-SA' : 'en-US'),
           image: tx.counterpartyImage,
-          initials: tx.counterpartyName ? tx.counterpartyName[0].toUpperCase() : null,
+          initials: tx.counterpartyName ? getInitials(tx.counterpartyName) : null,
           isP2P: !!tx.counterpartyPhone
         };
       });
@@ -159,9 +166,18 @@ export default function WalletDashboard() {
   return (
     <div className="page">
       <header className="page-header">
-        <div>
-          <p className="text-caption">{t('wallet.greeting')}</p>
-          <p className="text-title">{t('wallet.welcomeBack')} {user?.name?.split(' ')[0] || 'User'}! 👋</p>
+        <div className="flex gap-md" style={{ alignItems: 'center' }}>
+          <Link to="/profile" className="avatar-circle" style={{ width: 44, height: 44, borderRadius: '50%', background: 'var(--bg-tertiary)', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none', border: 'none' }}>
+            {user?.profileImage ? (
+              <img src={user.profileImage} alt={user?.name || 'User'} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+            ) : (
+              <span style={{ color: 'var(--primary)', fontWeight: 600, fontSize: '0.875rem' }}>{getInitials(user?.name) || 'U'}</span>
+            )}
+          </Link>
+          <div>
+            <p className="text-caption">{t('wallet.greeting')}</p>
+            <p className="text-title">{t('wallet.welcomeBack')} {user?.name?.split(' ')[0] || 'User'}! 👋</p>
+          </div>
         </div>
         <button className="btn btn-ghost" style={{ width: 'auto', padding: '8px' }}>
           🔔
@@ -220,13 +236,15 @@ export default function WalletDashboard() {
                   className="transaction-item"
                   style={{ textDecoration: 'none', color: 'inherit' }}
                 >
-                  <div className={`transaction-icon ${tx.type}`} style={{ overflow: 'hidden', position: 'relative', background: 'var(--bg-tertiary)' }}>
+                  <div className={`transaction-icon ${tx.type}`} style={{ overflow: 'hidden', position: 'relative', background: 'var(--bg-tertiary)', border: 'none' }}>
                     {tx.image ? (
                       <img src={tx.image} alt={tx.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                     ) : tx.initials ? (
-                      <span style={{ color: 'var(--primary)', fontWeight: 600 }}>{tx.initials}</span>
+                      <span style={{ color: 'var(--primary)', fontWeight: 600, fontSize: '0.875rem' }}>{tx.initials}</span>
                     ) : (
-                      <span style={{ fontSize: '1.2rem' }}>{tx.type === 'credit' ? '⚡' : '👤'}</span>
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.4 }}>
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+                      </svg>
                     )}
                   </div>
                   <div className="transaction-details">

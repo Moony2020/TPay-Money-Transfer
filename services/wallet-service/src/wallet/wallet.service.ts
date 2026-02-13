@@ -1,4 +1,4 @@
-﻿import { Injectable, NotFoundException, ConflictException, BadRequestException } from '@nestjs/common';
+﻿import { Injectable, NotFoundException, ConflictException, BadRequestException, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateWalletDto } from './dto/create-wallet.dto';
 import { Decimal } from 'decimal.js';
@@ -6,6 +6,7 @@ import { TransactionType, TransactionStatus, EntryType } from '@prisma/client';
 
 @Injectable()
 export class WalletService {
+  private readonly logger = new Logger(WalletService.name);
   constructor(private prisma: PrismaService) {}
 
   async createWallet(dto: CreateWalletDto) {
@@ -129,16 +130,19 @@ export class WalletService {
     const enrichedData = entries.map(e => {
       const tx = e.transaction;
       const otherUserId = e.entryType === EntryType.DEBIT ? tx.recipientWallet?.userId : tx.senderWallet?.userId;
-      const otherUser = otherUserId ? userMap[otherUserId] : null;
+      const otherUser = (otherUserId && userMap[otherUserId]) ? userMap[otherUserId] : null;
+
+      const sId = tx.senderWallet?.userId;
+      const rId = tx.recipientWallet?.userId;
 
       return {
         ...e,
         transaction: {
           ...tx,
-          senderName: userMap[tx.senderWallet?.userId]?.fullName,
-          senderImage: userMap[tx.senderWallet?.userId]?.profileImageUrl,
-          recipientName: userMap[tx.recipientWallet?.userId]?.fullName,
-          recipientImage: userMap[tx.recipientWallet?.userId]?.profileImageUrl,
+          senderName: (sId && userMap[sId]) ? userMap[sId].fullName : undefined,
+          senderImage: (sId && userMap[sId]) ? userMap[sId].profileImageUrl : undefined,
+          recipientName: (rId && userMap[rId]) ? userMap[rId].fullName : undefined,
+          recipientImage: (rId && userMap[rId]) ? userMap[rId].profileImageUrl : undefined,
           counterpartyName: otherUser?.fullName,
           counterpartyImage: otherUser?.profileImageUrl,
           counterpartyPhone: otherUser?.phoneNumber,
@@ -158,16 +162,21 @@ export class WalletService {
   }
 
   private async getEnrichedUserData(userIds: string[]) {
-    if (!userIds.length) return {};
     try {
+      if (userIds.length === 0) return {};
+      // Format userIds for Raw SQL UUID array lookup
+      const uuidList = userIds.map(id => `'${id}'::uuid`).join(',');
       const users: any[] = await this.prisma.$queryRawUnsafe(`
         SELECT id, full_name as "fullName", profile_image_url as "profileImageUrl", phone_number as "phoneNumber"
         FROM public.users
-        WHERE id IN (${userIds.map(id => `'${id}'`).join(',')})
+        WHERE id IN (${uuidList})
       `);
       
       const map = {};
-      users.forEach(u => map[u.id] = u);
+      users.forEach(u => {
+        const sid = u.id.toString();
+        map[sid] = u;
+      });
       return map;
     } catch (err) {
       this.logger.warn('Failed to enrich user data from auth schema: ' + err.message);
@@ -177,12 +186,14 @@ export class WalletService {
 
   async lookupUserByPhone(phoneNumber: string) {
     try {
-      const users: any[] = await this.prisma.$queryRaw`
+      // Match phone number with or without prefix
+      const cleanPhone = phoneNumber.replace(/[^\d+]/g, '');
+      const users: any[] = await this.prisma.$queryRawUnsafe(`
         SELECT full_name as "fullName", profile_image_url as "profileImageUrl"
         FROM public.users
-        WHERE phone_number = ${phoneNumber}
+        WHERE phone_number = $1 OR phone_number = $2
         LIMIT 1
-      `;
+      `, cleanPhone, cleanPhone.startsWith('+211') ? cleanPhone.replace('+211', '0') : cleanPhone);
       return users[0] || null;
     } catch (err) {
       this.logger.error('Lookup failed: ' + err.message);

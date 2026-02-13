@@ -52,6 +52,9 @@ export function AuthProvider({ children }) {
         setUser(null);
         setIsAuthenticated(false);
       }
+      if (error?.message === 'canceled' || error?.name === 'CanceledError' || error?.code === 'ERR_CANCELED' || error?.message?.includes('aborted')) {
+        return { success: false };
+      }
       telemetry.error(error, { context: 'profile_refresh' });
       return {
         success: false,

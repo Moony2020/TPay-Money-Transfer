@@ -5,6 +5,13 @@ import { walletService, telemetry } from '../api/client';
 import { useNotification } from '../context/NotificationContext';
 import BackButton from '../components/BackButton';
 
+const getInitials = (name) => {
+  if (!name) return null;
+  const parts = name.split(' ').filter(p => p.length > 0);
+  if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+  return parts[0][0].toUpperCase();
+};
+
 export default function SendMoney() {
   const navigate = useNavigate();
   const { t, langCode } = useLanguage();
@@ -13,6 +20,7 @@ export default function SendMoney() {
   const [senderWallet, setSenderWallet] = useState(null);
   const [recipient, setRecipient] = useState('');
   const [recipientName, setRecipientName] = useState('');
+  const [recipientImage, setRecipientImage] = useState(null);
   const [amount, setAmount] = useState('');
   const [description, setDescription] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -57,17 +65,21 @@ export default function SendMoney() {
           const data = await walletService.lookupPhone(digits);
           if (data && data.fullName) {
             setRecipientName(data.fullName);
+            setRecipientImage(data.profileImageUrl);
           } else {
             const label = t('send.recipient');
             setRecipientName(label && label !== 'send.recipient' ? label : 'Recipient');
+            setRecipientImage(null);
           }
         } catch (err) {
           console.error('Lookup failed:', err);
           const label = t('send.recipient');
           setRecipientName(label && label !== 'send.recipient' ? label : 'Recipient');
+          setRecipientImage(null);
         }
       } else {
         setRecipientName('');
+        setRecipientImage(null);
       }
     };
 
@@ -270,8 +282,16 @@ export default function SendMoney() {
             </header>
             <div className="page-content">
               <div className="card mb-lg flex gap-md" style={{ alignItems: 'center' }}>
-                <div className="avatar-circle" style={{ width: 48, height: 48, borderRadius: '50%', background: 'var(--primary)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.25rem', fontWeight: 600 }}>
-                  {recipientName[0]}
+                <div className="avatar-circle" style={{ width: 48, height: 48, borderRadius: '50%', background: 'var(--bg-tertiary)', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1rem', fontWeight: 600, overflow: 'hidden' }}>
+                  {recipientImage ? (
+                    <img src={recipientImage} alt={recipientName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  ) : recipientName ? (
+                    getInitials(recipientName)
+                  ) : (
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.4 }}>
+                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+                    </svg>
+                  )}
                 </div>
                 <div>
                   <p className="text-title">{recipientName}</p>
@@ -344,6 +364,17 @@ export default function SendMoney() {
             <div className="page-content">
               <div className="card mb-lg text-center" style={{ background: 'var(--bg-tertiary)' }}>
                 <p className="text-caption mb-sm">{t('send.sending')}</p>
+                <div className="avatar-circle mb-md" style={{ width: 64, height: 64, borderRadius: '50%', background: 'var(--bg-primary)', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.25rem', fontWeight: 600, overflow: 'hidden', margin: '0 auto 16px' }}>
+                  {recipientImage ? (
+                    <img src={recipientImage} alt={recipientName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  ) : recipientName ? (
+                    getInitials(recipientName)
+                  ) : (
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.4 }}>
+                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+                    </svg>
+                  )}
+                </div>
                 <p className="text-display" style={{ color: 'var(--primary)' }}>
                   SSP {formatCurrency(parseFloat(amount))}
                 </p>
@@ -391,8 +422,21 @@ export default function SendMoney() {
         return (
           <div className="page flex-center" style={{ background: 'var(--bg-primary)' }}>
             <div className="text-center p-lg">
-              <div style={{ width: 80, height: 80, borderRadius: '50%', background: 'var(--success)', margin: '0 auto 24px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <span style={{ fontSize: '2.5rem', color: 'white', lineHeight: 1 }}>✓</span>
+              <div style={{ position: 'relative', width: 80, height: 80, margin: '0 auto 24px' }}>
+                <div style={{ width: 80, height: 80, borderRadius: '50%', background: 'var(--bg-tertiary)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', border: '2px solid var(--success)' }}>
+                  {recipientImage ? (
+                    <img src={recipientImage} alt={recipientName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  ) : recipientName ? (
+                    <span style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--primary)' }}>{getInitials(recipientName)}</span>
+                  ) : (
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.4 }}>
+                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+                    </svg>
+                  )}
+                </div>
+                <div style={{ position: 'absolute', right: -4, bottom: -4, width: 28, height: 28, borderRadius: '50%', background: 'var(--success)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1rem', border: '3px solid var(--bg-primary)' }}>
+                  ✓
+                </div>
               </div>
               <h1 className="text-heading mb-sm">{t('send.success')}</h1>
               <p className="text-body mb-lg" style={{ color: 'var(--text-secondary)' }}>

@@ -4,6 +4,13 @@ import { useLanguage } from '../context/LanguageContext';
 import { walletService, telemetry } from '../api/client';
 import BackButton from '../components/BackButton';
 
+const getInitials = (name) => {
+  if (!name) return null;
+  const parts = name.split(' ').filter(p => p.length > 0);
+  if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+  return parts[0][0].toUpperCase();
+};
+
 export default function TransactionHistory() {
   const { t, langCode } = useLanguage();
   const [transactions, setTransactions] = useState([]);
@@ -33,7 +40,7 @@ export default function TransactionHistory() {
           date: entry.createdAt,
           status: entry.transaction.status,
           image: tx.counterpartyImage,
-          initials: (tx.counterpartyName || tx.description || t('history.sent'))[0]?.toUpperCase() || '?'
+          initials: tx.counterpartyName ? getInitials(tx.counterpartyName) : null
         };
       });
 
@@ -173,15 +180,16 @@ export default function TransactionHistory() {
                 className="transaction-item"
                 style={{ textDecoration: 'none', color: 'inherit' }}
               >
-                <div className={`transaction-icon ${tx.type}`} style={{ overflow: 'hidden', position: 'relative' }}>
+                <div className={`transaction-icon ${tx.type}`} style={{ overflow: 'hidden', position: 'relative', background: 'var(--bg-tertiary)', border: 'none' }}>
                   {tx.image ? (
                     <img src={tx.image} alt={tx.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  ) : tx.initials ? (
+                    <span style={{ color: 'var(--primary)', fontWeight: 600, fontSize: '0.875rem' }}>{tx.initials}</span>
                   ) : (
-                    <span style={{ color: 'inherit', fontWeight: 600 }}>{tx.initials}</span>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.4 }}>
+                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+                    </svg>
                   )}
-                  <div style={{ position: 'absolute', right: -2, bottom: -2, background: 'var(--bg-primary)', borderRadius: '50%', padding: '2px', display: 'flex' }}>
-                     <div style={{ width: 10, height: 10, borderRadius: '50%', background: tx.type === 'credit' ? 'var(--success)' : 'var(--danger)', border: '1.5px solid var(--bg-primary)' }} />
-                  </div>
                 </div>
                 <div className="transaction-details">
                   <p className="transaction-title">{tx.title}</p>

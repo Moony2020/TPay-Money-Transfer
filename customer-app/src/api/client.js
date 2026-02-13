@@ -1,14 +1,16 @@
 import axios from 'axios';
 
 // API Client Configuration
+const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+
 const authApi = axios.create({
-  baseURL: 'https://tpay-auth-api.onrender.com/auth',
+  baseURL: isLocal ? 'http://localhost:3001' : 'https://tpay-auth-api.onrender.com',
   timeout: 10000,
   headers: { 'Content-Type': 'application/json' }
 });
 
 const walletApi = axios.create({
-  baseURL: 'https://tpay-wallet-api.onrender.com',
+  baseURL: isLocal ? 'http://localhost:3002' : 'https://tpay-wallet-api.onrender.com',
   timeout: 10000,
   headers: { 'Content-Type': 'application/json' }
 });
@@ -82,7 +84,7 @@ export const authService = {
   register: async (phone, name, pin) => {
     // Format phone to +211XXXXXXXXX
     const formattedPhone = phone.replace(/[\s-]/g, '');
-    const response = await authApi.post('/signup', { 
+    const response = await authApi.post('/auth/signup', { 
       phoneNumber: formattedPhone, 
       fullName: name,
       pin 
@@ -92,26 +94,26 @@ export const authService = {
 
   // Request OTP
   requestOtp: async (phone) => {
-    const response = await authApi.post('/otp/request', { phone });
+    const response = await authApi.post('/auth/otp/request', { phone });
     return response.data;
   },
 
   // Verify OTP
   verifyOtp: async (phone, otp) => {
-    const response = await authApi.post('/otp/verify', { phone, otp });
+    const response = await authApi.post('/auth/otp/verify', { phone, otp });
     return response.data;
   },
 
   // Set PIN
   setPin: async (phone, pin) => {
-    const response = await authApi.post('/pin/set', { phone, pin });
+    const response = await authApi.post('/auth/pin/set', { phone, pin });
     return response.data;
   },
 
   // Login with phone + PIN
   login: async (phone, pin) => {
     const formattedPhone = phone.replace(/[\s-]/g, '');
-    const response = await authApi.post('/login', { phoneNumber: formattedPhone, pin });
+    const response = await authApi.post('/auth/login', { phoneNumber: formattedPhone, pin });
     const token = response.data.access_token || response.data.token;
     if (token) {
       tokenManager.setToken(token);
@@ -124,25 +126,25 @@ export const authService = {
 
   // Get current authenticated user profile
   getProfile: async () => {
-    const response = await authApi.get('/profile');
+    const response = await authApi.get('/auth/profile');
     return response.data;
   },
 
   // Upload or replace profile image
   uploadProfileImage: async (imageData) => {
-    const response = await authApi.post('/profile/image', { imageData });
+    const response = await authApi.post('/auth/profile/image', { imageData });
     return response.data;
   },
 
   // Remove profile image
   removeProfileImage: async () => {
-    const response = await authApi.delete('/profile/image');
+    const response = await authApi.delete('/auth/profile/image');
     return response.data;
   },
 
   // Update profile details (name, picture)
   updateProfile: async (data) => {
-    const response = await authApi.patch('/profile', data);
+    const response = await authApi.patch('/auth/profile', data);
     return response.data;
   },
 
