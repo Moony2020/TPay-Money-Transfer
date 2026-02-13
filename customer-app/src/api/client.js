@@ -213,6 +213,13 @@ export const walletService = {
       { headers: { 'admin-key': adminKey } }
     );
     return response.data;
+  },
+
+  // Lookup user by phone
+  lookupPhone: async (phone) => {
+    const formattedPhone = phone.replace(/[\s-]/g, '');
+    const response = await walletApi.get(`/wallets/lookup/${formattedPhone}`);
+    return response.data;
   }
 };
 

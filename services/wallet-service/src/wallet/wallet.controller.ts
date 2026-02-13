@@ -46,4 +46,9 @@ export class WalletController {
       limit ? parseInt(limit, 10) : 20,
     );
   }
+  @UseGuards(JwtAuthGuard)
+  @Get('lookup/:phone')
+  async lookup(@Param('phone') phone: string) {
+    return this.walletService.lookupUserByPhone(phone);
+  }
 }

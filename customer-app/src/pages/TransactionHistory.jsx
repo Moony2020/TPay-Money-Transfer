@@ -19,15 +19,23 @@ export default function TransactionHistory() {
       const wallet = await walletService.getMyWallet();
       const history = await walletService.getHistory(wallet.id, { limit: 50 });
       
-      const mapped = history.data.map(entry => ({
-        id: entry.id,
-        type: entry.entryType.toLowerCase(),
-        title: entry.transaction.description || (entry.entryType === 'CREDIT' ? t('history.received') : t('history.sent')),
-        subtitle: entry.transaction.type.replace('_', ' '),
-        amount: Math.abs(parseFloat(entry.amount)),
-        date: entry.createdAt,
-        status: entry.transaction.status
-      }));
+      const mapped = history.data.map(entry => {
+        const tx = entry.transaction;
+        const isCredit = entry.entryType === 'CREDIT';
+        
+        return {
+          id: entry.id,
+          txId: tx.id,
+          type: entry.entryType.toLowerCase(),
+          title: tx.counterpartyName || tx.description || (isCredit ? t('history.received') : t('history.sent')),
+          subtitle: tx.counterpartyPhone ? `${tx.type.replace('_', ' ')} • ${tx.counterpartyPhone}` : tx.type.replace('_', ' '),
+          amount: Math.abs(parseFloat(entry.amount)),
+          date: entry.createdAt,
+          status: entry.transaction.status,
+          image: tx.counterpartyImage,
+          initials: (tx.counterpartyName || tx.description || t('history.sent'))[0]?.toUpperCase() || '?'
+        };
+      });
 
       let filtered = mapped;
       if (filter === 'sent') {
@@ -165,8 +173,15 @@ export default function TransactionHistory() {
                 className="transaction-item"
                 style={{ textDecoration: 'none', color: 'inherit' }}
               >
-                <div className={`transaction-icon ${tx.type}`}>
-                  {tx.type === 'credit' ? <ArrowDownIcon /> : <ArrowUpIcon />}
+                <div className={`transaction-icon ${tx.type}`} style={{ overflow: 'hidden', position: 'relative' }}>
+                  {tx.image ? (
+                    <img src={tx.image} alt={tx.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  ) : (
+                    <span style={{ color: 'inherit', fontWeight: 600 }}>{tx.initials}</span>
+                  )}
+                  <div style={{ position: 'absolute', right: -2, bottom: -2, background: 'var(--bg-primary)', borderRadius: '50%', padding: '2px', display: 'flex' }}>
+                     <div style={{ width: 10, height: 10, borderRadius: '50%', background: tx.type === 'credit' ? 'var(--success)' : 'var(--danger)', border: '1.5px solid var(--bg-primary)' }} />
+                  </div>
                 </div>
                 <div className="transaction-details">
                   <p className="transaction-title">{tx.title}</p>

@@ -104,14 +104,50 @@ export class WalletService {
       skip,
       take: limit,
       include: {
-        transaction: true,
+        transaction: {
+          include: {
+            senderWallet: true,
+            recipientWallet: true,
+          }
+        },
       },
     });
 
     const total = await this.prisma.ledgerEntry.count({ where: { walletId } });
 
+    // Extract all unique user IDs involved in these transactions
+    const userIds = new Set<string>();
+    entries.forEach(e => {
+      if (e.transaction.senderWallet?.userId) userIds.add(e.transaction.senderWallet.userId);
+      if (e.transaction.recipientWallet?.userId) userIds.add(e.transaction.recipientWallet.userId);
+    });
+
+    // Fetch user details from public.users (Auth service schema)
+    const userMap = await this.getEnrichedUserData(Array.from(userIds));
+
+    // Enrich entries
+    const enrichedData = entries.map(e => {
+      const tx = e.transaction;
+      const otherUserId = e.entryType === EntryType.DEBIT ? tx.recipientWallet?.userId : tx.senderWallet?.userId;
+      const otherUser = otherUserId ? userMap[otherUserId] : null;
+
+      return {
+        ...e,
+        transaction: {
+          ...tx,
+          senderName: userMap[tx.senderWallet?.userId]?.fullName,
+          senderImage: userMap[tx.senderWallet?.userId]?.profileImageUrl,
+          recipientName: userMap[tx.recipientWallet?.userId]?.fullName,
+          recipientImage: userMap[tx.recipientWallet?.userId]?.profileImageUrl,
+          counterpartyName: otherUser?.fullName,
+          counterpartyImage: otherUser?.profileImageUrl,
+          counterpartyPhone: otherUser?.phoneNumber,
+        }
+      };
+    });
+
     return {
-      data: entries,
+      data: enrichedData,
       pagination: {
         page,
         limit,
@@ -119,6 +155,39 @@ export class WalletService {
         totalPages: Math.ceil(total / limit),
       },
     };
+  }
+
+  private async getEnrichedUserData(userIds: string[]) {
+    if (!userIds.length) return {};
+    try {
+      const users: any[] = await this.prisma.$queryRawUnsafe(`
+        SELECT id, full_name as "fullName", profile_image_url as "profileImageUrl", phone_number as "phoneNumber"
+        FROM public.users
+        WHERE id IN (${userIds.map(id => `'${id}'`).join(',')})
+      `);
+      
+      const map = {};
+      users.forEach(u => map[u.id] = u);
+      return map;
+    } catch (err) {
+      this.logger.warn('Failed to enrich user data from auth schema: ' + err.message);
+      return {};
+    }
+  }
+
+  async lookupUserByPhone(phoneNumber: string) {
+    try {
+      const users: any[] = await this.prisma.$queryRaw`
+        SELECT full_name as "fullName", profile_image_url as "profileImageUrl"
+        FROM public.users
+        WHERE phone_number = ${phoneNumber}
+        LIMIT 1
+      `;
+      return users[0] || null;
+    } catch (err) {
+      this.logger.error('Lookup failed: ' + err.message);
+      return null;
+    }
   }
 
   async faucet(userId: string, amount: number, currency: string) {

@@ -70,15 +70,27 @@ export default function WalletDashboard() {
         lastUpdated: new Date()
       });
       
-      const mappedTransactions = historyData.data.map(entry => ({
-        id: entry.id,
-        txId: entry.transactionId,
-        type: entry.entryType.toLowerCase(),
-        title: entry.transaction.description || (entry.entryType === 'CREDIT' ? t('history.received') : t('history.sent')),
-        subtitle: entry.transaction.type.replace('_', ' '),
-        amount: Math.abs(parseFloat(entry.amount)),
-        date: new Date(entry.createdAt).toLocaleDateString(langCode === 'ar' ? 'ar-SA' : 'en-US')
-      }));
+      const mappedTransactions = historyData.data.map(entry => {
+        const tx = entry.transaction;
+        const isCredit = entry.entryType === 'CREDIT';
+        
+        // Use enriched info from backend
+        const displayTitle = tx.counterpartyName || tx.description || (isCredit ? t('history.received') : t('history.sent'));
+        const displaySubtitle = tx.counterpartyPhone ? `${tx.type.replace('_', ' ')} • ${tx.counterpartyPhone}` : tx.type.replace('_', ' ');
+        
+        return {
+          id: entry.id,
+          txId: tx.id,
+          type: entry.entryType.toLowerCase(),
+          title: displayTitle,
+          subtitle: displaySubtitle,
+          amount: Math.abs(parseFloat(entry.amount)),
+          date: new Date(entry.createdAt).toLocaleDateString(langCode === 'ar' ? 'ar-SA' : 'en-US'),
+          image: tx.counterpartyImage,
+          initials: tx.counterpartyName ? tx.counterpartyName[0].toUpperCase() : null,
+          isP2P: !!tx.counterpartyPhone
+        };
+      });
 
       // Check for new incoming transactions during polling
       if (isPolling && mappedTransactions.length > 0) {
@@ -208,8 +220,14 @@ export default function WalletDashboard() {
                   className="transaction-item"
                   style={{ textDecoration: 'none', color: 'inherit' }}
                 >
-                  <div className={`transaction-icon ${tx.type}`}>
-                    {tx.type === 'credit' ? <ArrowDownIcon /> : <ArrowUpIcon />}
+                  <div className={`transaction-icon ${tx.type}`} style={{ overflow: 'hidden', position: 'relative', background: 'var(--bg-tertiary)' }}>
+                    {tx.image ? (
+                      <img src={tx.image} alt={tx.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    ) : tx.initials ? (
+                      <span style={{ color: 'var(--primary)', fontWeight: 600 }}>{tx.initials}</span>
+                    ) : (
+                      <span style={{ fontSize: '1.2rem' }}>{tx.type === 'credit' ? '⚡' : '👤'}</span>
+                    )}
                   </div>
                   <div className="transaction-details">
                     <p className="transaction-title">{tx.title}</p>

@@ -37,6 +37,44 @@ export default function SendMoney() {
     fetchWallet();
   }, [t]);
 
+  // Real-time recipient lookup
+  useEffect(() => {
+    const lookupRecipient = async () => {
+      let digits = recipient.replace(/[^\d+]/g, '');
+      if (!digits) {
+        setRecipientName('');
+        return;
+      }
+      
+      if (!digits.startsWith('+')) {
+        if (digits.startsWith('211')) digits = '+' + digits;
+        else if (digits.startsWith('0')) digits = '+211' + digits.substring(1);
+        else digits = '+211' + digits;
+      }
+
+      if (digits.length >= 10) {
+        try {
+          const data = await walletService.lookupPhone(digits);
+          if (data && data.fullName) {
+            setRecipientName(data.fullName);
+          } else {
+            const label = t('send.recipient');
+            setRecipientName(label && label !== 'send.recipient' ? label : 'Recipient');
+          }
+        } catch (err) {
+          console.error('Lookup failed:', err);
+          const label = t('send.recipient');
+          setRecipientName(label && label !== 'send.recipient' ? label : 'Recipient');
+        }
+      } else {
+        setRecipientName('');
+      }
+    };
+
+    const timeout = setTimeout(lookupRecipient, 500);
+    return () => clearTimeout(timeout);
+  }, [recipient, t]);
+
   const quickAmounts = [500, 1000, 5000, 10000];
 
   const formatCurrency = (value) => {
@@ -71,7 +109,7 @@ export default function SendMoney() {
       }
 
       setRecipient(digits);
-      setRecipientName('Recipient'); 
+      // Recipient name is already set by lookup effect
       setStep(2);
     } else if (step === 2) {
       const numAmount = parseFloat(amount);
@@ -249,7 +287,7 @@ export default function SendMoney() {
                     value={amount}
                     onChange={(e) => setAmount(e.target.value)}
                     placeholder="0.00"
-                    style={{ border: 'none', background: 'transparent', fontSize: 'inherit', fontWeight: 'inherit', fontFamily: 'inherit', width: '150px', textAlign: 'left', outline: 'none' }}
+                    style={{ border: 'none', background: 'transparent', fontSize: 'inherit', fontWeight: 'inherit', fontFamily: 'inherit', width: '150px', textAlign: 'left', outline: 'none', color: 'inherit' }}
                     aria-label="Amount"
                   />
                 </div>

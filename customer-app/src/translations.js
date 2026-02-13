@@ -75,7 +75,8 @@ export const translations = {
       transactionId: 'Transaction ID',
       share: 'Share Receipt',
       available: 'Available balance',
-      insufficientFunds: 'Insufficient funds'
+      insufficientFunds: 'Insufficient funds',
+      recipient: 'Recipient'
     },
     profile: {
       title: 'Profile',
@@ -191,7 +192,8 @@ export const translations = {
       transactionId: 'Transaktions-ID',
       share: 'Dela kvitto',
       available: 'Tillgängligt saldo',
-      insufficientFunds: 'Otillräckliga medel'
+      insufficientFunds: 'Otillräckliga medel',
+      recipient: 'Mottagare'
     },
     profile: {
       title: 'Profil',
@@ -307,7 +309,8 @@ export const translations = {
       transactionId: 'رقم المعاملة',
       share: 'مشاركة الإيصال',
       available: 'الرصيد المتاح',
-      insufficientFunds: 'رصيد غير كافٍ'
+      insufficientFunds: 'رصيد غير كافٍ',
+      recipient: 'المستلم'
     },
     profile: {
       title: 'الملف الشخصي',
@@ -423,7 +426,8 @@ export const translations = {
       transactionId: 'ID de transaction',
       share: 'Partager le reçu',
       available: 'Solde disponible',
-      insufficientFunds: 'Fonds insuffisants'
+      insufficientFunds: 'Fonds insuffisants',
+      recipient: 'Destinataire'
     },
     profile: {
       title: 'Profil',
@@ -539,7 +543,8 @@ export const translations = {
       transactionId: 'ID de transacción',
       share: 'Compartir recibo',
       available: 'Saldo disponible',
-      insufficientFunds: 'Fondos insuficientes'
+      insufficientFunds: 'Fondos insuficientes',
+      recipient: 'Destinatario'
     },
     profile: {
       title: 'Perfil',
