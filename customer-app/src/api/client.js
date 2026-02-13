@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // API Client Configuration
 const authApi = axios.create({
-  baseURL: '/api/auth',
+  baseURL: 'https://tpay-auth-api.onrender.com/auth',
   timeout: 10000,
   headers: { 'Content-Type': 'application/json' }
 });
