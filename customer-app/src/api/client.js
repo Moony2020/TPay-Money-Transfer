@@ -8,7 +8,7 @@ const authApi = axios.create({
 });
 
 const walletApi = axios.create({
-  baseURL: '/api/wallet',
+  baseURL: 'https://tpay-wallet-api.onrender.com/wallets',
   timeout: 10000,
   headers: { 'Content-Type': 'application/json' }
 });
