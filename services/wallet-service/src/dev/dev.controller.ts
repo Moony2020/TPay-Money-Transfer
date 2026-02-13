@@ -11,7 +11,7 @@ export class DevController {
   @UseGuards(JwtAuthGuard)
   @Post('faucet')
   async faucet(@GetUser() user: any, @Body() dto: FaucetDto) {
-    if (process.env.NODE_ENV === 'production') {
+    if (process.env.NODE_ENV === 'production' && process.env.ENABLE_DEV_TOOLS !== 'true') {
       throw new ForbiddenException('Dev tools not available in production');
     }
 
