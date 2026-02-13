@@ -51,7 +51,7 @@ export class WalletService {
     }
 
     try {
-      const existing = await this.prisma.wallet.findUnique({
+      const existing = await this.prisma.wallet.findFirst({
         where: { userId },
       });
       
