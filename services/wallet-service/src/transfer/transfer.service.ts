@@ -10,9 +10,12 @@ import { WalletService } from '../wallet/wallet.service';
 import { P2PTransferDto, MerchantPaymentDto } from './dto/transfer.dto';
 import { Decimal } from 'decimal.js';
 import { Prisma, TransactionType, TransactionStatus, EntryType } from '@prisma/client';
+import Redis from 'ioredis';
 
 @Injectable()
 export class TransferService {
+  private redisClient = new Redis(process.env.REDIS_URL || 'redis://localhost:6379');
+
   constructor(
     private prisma: PrismaService,
     private walletService: WalletService,
@@ -171,6 +174,36 @@ export class TransferService {
           timeout: 15000, // 15 seconds
         },
       );
+
+      // --- Real-time Notifications ---
+      try {
+        const recipientWallet = await this.prisma.wallet.findUnique({
+          where: { id: finalRecipientWalletId! },
+          select: { userId: true },
+        });
+
+        if (recipientWallet) {
+          // Notify Recipient
+          await this.redisClient.publish('tpay_notifications', JSON.stringify({
+            userId: recipientWallet.userId,
+            type: 'TRANSFER_RECEIVED',
+            title: 'Money Received! 💰',
+            message: `You received SSP ${amount.toFixed(2)} from ${dto.senderWalletId.substring(0, 8)}...`,
+            data: { transactionId: result.id, amount: amount.toFixed(2) }
+          }));
+
+          // Notify Sender
+          await this.redisClient.publish('tpay_notifications', JSON.stringify({
+            userId: senderWallet.userId,
+            type: 'TRANSFER_SENT',
+            title: 'Transfer Successful! ✅',
+            message: `Sent SSP ${amount.toFixed(2)} to ${dto.recipientPhone || 'User'}`,
+            data: { transactionId: result.id, amount: amount.toFixed(2) }
+          }));
+        }
+      } catch (notifyErr) {
+        console.warn('Notification failed but transfer succeeded:', notifyErr);
+      }
 
       return {
         message: 'Transfer successful',

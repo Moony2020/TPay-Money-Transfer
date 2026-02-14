@@ -3,6 +3,8 @@ import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtAuthGuard } from './jwt-auth.guard';
+import { NotificationsGateway } from './notifications.gateway';
+import { RedisListenerService } from './redis-listener.service';
 
 @Module({
   imports: [
@@ -13,6 +15,6 @@ import { JwtAuthGuard } from './jwt-auth.guard';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtAuthGuard],
+  providers: [AuthService, JwtAuthGuard, NotificationsGateway, RedisListenerService],
 })
 export class AuthModule {}
