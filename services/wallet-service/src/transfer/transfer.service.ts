@@ -4,6 +4,7 @@ import {
   ConflictException,
   InternalServerErrorException,
   UnauthorizedException,
+  Logger,
 } from '@nestjs/common';
 import { PrismaService } from '../database/prisma.service';
 import { WalletService } from '../wallet/wallet.service';
@@ -14,12 +15,18 @@ import Redis from 'ioredis';
 
 @Injectable()
 export class TransferService {
-  private redisClient = new Redis(process.env.REDIS_URL || 'redis://localhost:6379');
+  private redisClient: Redis;
+  private readonly logger = new Logger('TransferService');
 
   constructor(
     private prisma: PrismaService,
     private walletService: WalletService,
-  ) {}
+  ) {
+    this.redisClient = new Redis(process.env.REDIS_URL || 'redis://localhost:6379');
+    this.redisClient.on('error', (err) => {
+      this.logger.error(`Redis connection error: ${err.message}`);
+    });
+  }
 
   /**
    * Executes a P2P Transfer using Double-Entry Accounting.

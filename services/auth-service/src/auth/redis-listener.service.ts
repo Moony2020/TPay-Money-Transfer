@@ -12,6 +12,10 @@ export class RedisListenerService implements OnModuleInit, OnModuleDestroy {
   onModuleInit() {
     this.redisClient = new Redis(process.env.REDIS_URL || 'redis://localhost:6379');
     
+    // Add error handler to prevent unhandled exception logging
+    this.redisClient.on('error', (err) => {
+      this.logger.error(`Redis connection error: ${err.message}`);
+    });
     this.redisClient.subscribe('tpay_notifications', (err: any) => {
       if (err) {
         this.logger.error(`Failed to subscribe: ${err.message}`);
