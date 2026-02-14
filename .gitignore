@@ -40,3 +40,4 @@ Thumbs.db
 .npm/
 .eslintcache
 .cache/
+*.tsbuildinfo
