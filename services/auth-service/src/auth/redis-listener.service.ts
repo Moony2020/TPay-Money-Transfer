@@ -12,7 +12,7 @@ export class RedisListenerService implements OnModuleInit, OnModuleDestroy {
   onModuleInit() {
     this.redisClient = new Redis(process.env.REDIS_URL || 'redis://localhost:6379');
     
-    this.redisClient.subscribe('tpay_notifications', (err) => {
+    this.redisClient.subscribe('tpay_notifications', (err: any) => {
       if (err) {
         this.logger.error(`Failed to subscribe: ${err.message}`);
       } else {
@@ -28,7 +28,7 @@ export class RedisListenerService implements OnModuleInit, OnModuleDestroy {
           
           // Forward to WebSocket
           this.notificationsGateway.sendToUser(data.userId, 'notification', data);
-        } catch (err) {
+        } catch (err: any) {
           this.logger.error(`Error processing Redis message: ${err.message}`);
         }
       }

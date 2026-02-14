@@ -40,7 +40,7 @@ export class NotificationsGateway implements OnGatewayConnection, OnGatewayDisco
       client.join(`user_${userId}`);
       
       this.logger.log(`User ${userId} connected on socket ${client.id}`);
-    } catch (err) {
+    } catch (err: any) {
       this.logger.error(`Connection failed: ${err.message}`);
       client.disconnect();
     }
@@ -63,7 +63,7 @@ export class NotificationsGateway implements OnGatewayConnection, OnGatewayDisco
   }
 
   @SubscribeMessage('ping')
-  handlePing(client: Socket) {
+  handlePing() {
     return { event: 'pong', data: new Date().toISOString() };
   }
 }
