@@ -24,6 +24,10 @@ export class P2PTransferDto {
   @IsString()
   @IsOptional()
   description?: string;
+
+  @IsString()
+  @IsNotEmpty()
+  pin!: string;
 }
 
 export class MerchantPaymentDto extends P2PTransferDto {

@@ -76,7 +76,10 @@ export const translations = {
       share: 'Share Receipt',
       available: 'Available balance',
       insufficientFunds: 'Insufficient funds',
-      recipient: 'Recipient'
+      recipient: 'Recipient',
+      enterPin: 'Enter PIN',
+      verifyPinDesc: 'Enter your 6-digit secure PIN to authorize this transfer',
+      invalidPin: 'Invalid PIN. Please try again.'
     },
     profile: {
       title: 'Profile',
@@ -310,7 +313,10 @@ export const translations = {
       share: 'مشاركة الإيصال',
       available: 'الرصيد المتاح',
       insufficientFunds: 'رصيد غير كافٍ',
-      recipient: 'المستلم'
+      recipient: 'المستلم',
+      enterPin: 'أدخل الرقم السري',
+      verifyPinDesc: 'أدخل رقمك السري المكون من 6 أرقام لتأكيد عملية التحويل',
+      invalidPin: 'الرقم السري غير صحيح. حاول مرة أخرى.'
     },
     profile: {
       title: 'الملف الشخصي',

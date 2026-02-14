@@ -181,14 +181,15 @@ export const walletService = {
   },
 
   // Execute P2P transfer
-  sendMoney: async (senderWalletId, recipientPhone, amount, description) => {
+  sendMoney: async (senderWalletId, recipientPhone, amount, description, pin) => {
     const idempotencyKey = `p2p_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     const response = await walletApi.post('/transfers/p2p', {
       idempotencyKey,
       senderWalletId,
       recipientPhone,
       amount: parseFloat(amount),
-      description
+      description,
+      pin
     });
     return response.data;
   },

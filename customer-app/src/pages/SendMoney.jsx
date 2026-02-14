@@ -16,7 +16,8 @@ export default function SendMoney() {
   const navigate = useNavigate();
   const { t, langCode } = useLanguage();
   const { notify } = useNotification();
-  const [step, setStep] = useState(1); // 1: Recipient, 2: Amount, 3: Confirm, 4: Success
+  const [step, setStep] = useState(1); // 1: Recipient, 2: Amount, 3: Confirm, 4: PIN, 5: Success
+  const [pin, setPin] = useState('');
   const [senderWallet, setSenderWallet] = useState(null);
   const [recipient, setRecipient] = useState('');
   const [recipientName, setRecipientName] = useState('');
@@ -149,6 +150,12 @@ export default function SendMoney() {
         setIsLoading(false);
       }
     } else if (step === 3) {
+      setStep(4);
+    } else if (step === 4) {
+      if (!pin || pin.length < 6) {
+        setError(t('send.invalidPin'));
+        return;
+      }
       await executeTransfer();
     }
   };
@@ -195,7 +202,8 @@ export default function SendMoney() {
         senderWallet.id,
         recipient.replace(/[\s-]/g, ''),
         amount,
-        description || 'P2P Transfer'
+        description || 'P2P Transfer',
+        pin
       );
       
       console.log('>>> [SendMoney] Transfer result:', result);
@@ -208,7 +216,7 @@ export default function SendMoney() {
         timestamp: new Date().toISOString()
       });
       
-      setStep(4);
+      setStep(5);
       telemetry.log('transfer_success', { amount: parseFloat(amount), txId: result.transaction?.id || result.id });
     } catch (err) {
       console.error('Transfer error:', err);
@@ -420,6 +428,113 @@ export default function SendMoney() {
 
       case 4:
         return (
+          <div className="page" style={{ background: 'var(--bg-primary)' }}>
+            <div className="p-lg flex-column items-center">
+              <div style={{ marginTop: '40px' }} className="text-center">
+                <h1 className="text-heading mb-sm">{t('send.enterPin')}</h1>
+                <p className="text-body" style={{ color: 'var(--text-secondary)' }}>
+                  {t('send.verifyPinDesc')}
+                </p>
+              </div>
+
+              {/* PIN Dots */}
+              <div className="flex-center" style={{ gap: '16px', margin: '48px 0' }}>
+                {[0, 1, 2, 3, 4, 5].map((idx) => (
+                  <div
+                    key={idx}
+                    style={{
+                      width: '16px',
+                      height: '16px',
+                      borderRadius: '50%',
+                      border: '2px solid var(--primary)',
+                      background: pin.length > idx ? 'var(--primary)' : 'transparent',
+                      transition: 'all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275)'
+                    }}
+                  />
+                ))}
+              </div>
+
+              {error && (
+                <div className="text-center mb-md">
+                  <p className="input-error-text animate-shake">{error}</p>
+                </div>
+              )}
+
+              {isLoading && (
+                <div className="text-center mb-lg">
+                  <div className="loading-spinner" style={{ width: 24, height: 24, border: '3px solid var(--primary)', borderTopColor: 'transparent' }} />
+                </div>
+              )}
+
+              {/* Numeric Keypad */}
+              <div style={{ 
+                display: 'grid', 
+                gridTemplateColumns: 'repeat(3, 1fr)', 
+                gap: '16px', 
+                width: '100%', 
+                maxWidth: '300px',
+                marginTop: 'auto',
+                marginBottom: '40px'
+              }}>
+                {[1, 2, 3, 4, 5, 6, 7, 8, 9, '', 0, 'back'].map((key, i) => {
+                  if (key === '') return <div key={i} />;
+                  return (
+                    <button
+                      key={i}
+                      disabled={isLoading}
+                      onClick={() => {
+                        if (key === 'back') {
+                          setPin(prev => prev.slice(0, -1));
+                        } else if (pin.length < 6) {
+                          const newPin = pin + key;
+                          setPin(newPin);
+                          if (newPin.length === 6) {
+                            // Automatically trigger transfer when 6th digit entered
+                            setTimeout(() => executeTransfer(), 300);
+                          }
+                        }
+                      }}
+                      style={{
+                        height: '64px',
+                        borderRadius: '16px',
+                        border: 'none',
+                        background: 'var(--bg-tertiary)',
+                        color: 'var(--text-primary)',
+                        fontSize: '1.5rem',
+                        fontWeight: 600,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        cursor: 'pointer',
+                        transition: 'transform 0.1s active',
+                        opacity: isLoading ? 0.5 : 1
+                      }}
+                      onMouseDown={(e) => e.target.style.transform = 'scale(0.95)'}
+                      onMouseUp={(e) => e.target.style.transform = 'scale(1)'}
+                    >
+                      {key === 'back' ? (
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"/><line x1="18" y1="9" x2="12" y2="15"/><line x1="12" y1="9" x2="18" y2="15"/>
+                        </svg>
+                      ) : key}
+                    </button>
+                  );
+                })}
+              </div>
+
+              <button 
+                className="btn btn-ghost" 
+                onClick={() => setStep(3)}
+                disabled={isLoading}
+              >
+                {t('common.back')}
+              </button>
+            </div>
+          </div>
+        );
+
+      case 5:
+        return (
           <div className="page flex-center" style={{ background: 'var(--bg-primary)' }}>
             <div className="text-center p-lg">
               <div style={{ position: 'relative', width: 80, height: 80, margin: '0 auto 24px' }}>
@@ -448,7 +563,6 @@ export default function SendMoney() {
               </div>
               <button className="btn btn-primary mb-md" onClick={() => navigate('/home')}>{t('common.done')}</button>
               <button className="btn btn-secondary mb-md" onClick={handleShare}>{t('send.share')}</button>
-              {error && <p className="text-success text-small animate-fade-in">{error}</p>}
             </div>
           </div>
         );

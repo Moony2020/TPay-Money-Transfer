@@ -51,3 +51,16 @@ export class UpdateProfileImageDto {
   @MaxLength(4_000_000, { message: 'Image payload is too large' })
   imageData!: string;
 }
+
+export class VerifyPinDto {
+  @IsString()
+  @IsNotEmpty()
+  @MinLength(6)
+  pin!: string;
+}
+
+export class InternalVerifyPinDto extends VerifyPinDto {
+  @IsString()
+  @IsNotEmpty()
+  userId!: string;
+}

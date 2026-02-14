@@ -3,6 +3,7 @@ import {
   BadRequestException,
   ConflictException,
   InternalServerErrorException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { PrismaService } from '../database/prisma.service';
 import { WalletService } from '../wallet/wallet.service';
@@ -72,6 +73,37 @@ export class TransferService {
     // --- Business Validation ---
     if (dto.senderWalletId === finalRecipientWalletId) {
       throw new BadRequestException('Cannot transfer to the same wallet');
+    }
+
+    // --- PIN Verification ---
+    const senderWallet = await this.prisma.wallet.findUnique({
+      where: { id: dto.senderWalletId },
+      select: { userId: true },
+    });
+
+    if (!senderWallet) {
+      throw new BadRequestException('Sender wallet not found');
+    }
+
+    try {
+      const authServiceUrl = process.env.AUTH_SERVICE_URL || 'http://127.0.0.1:3001';
+      const response = await fetch(`${authServiceUrl}/auth/internal/verify-pin`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: senderWallet.userId,
+          pin: dto.pin,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new UnauthorizedException('Security check failed: Invalid PIN');
+      }
+    } catch (err) {
+      if (err instanceof UnauthorizedException) throw err;
+      throw new InternalServerErrorException('Security verification service unavailable');
     }
 
     // --- Execute Atomic Transaction ---

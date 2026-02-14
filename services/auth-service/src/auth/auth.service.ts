@@ -209,6 +209,24 @@ export class AuthService {
     }
   }
 
+  async verifyPin(userId: string, pin: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { hashedPin: true },
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const isValid = await argon2.verify(user.hashedPin, pin);
+    if (!isValid) {
+      throw new UnauthorizedException('Invalid PIN');
+    }
+
+    return { verified: true };
+  }
+
   private async generateToken(
     userId: string,
     phoneNumber: string,

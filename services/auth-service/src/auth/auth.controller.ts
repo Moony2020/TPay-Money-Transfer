@@ -10,7 +10,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { SignupDto, LoginDto, UpdateProfileImageDto, UpdateProfileDto } from './dto/auth.dto';
+import { SignupDto, LoginDto, UpdateProfileImageDto, UpdateProfileDto, VerifyPinDto, InternalVerifyPinDto } from './dto/auth.dto';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { GetUser } from './get-user.decorator';
 
@@ -63,5 +63,21 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   removeProfileImage(@GetUser() user: { sub: string }) {
     return this.authService.removeProfileImage(user.sub);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('verify-pin')
+  @HttpCode(HttpStatus.OK)
+  verifyPin(
+    @GetUser() user: { sub: string },
+    @Body() dto: VerifyPinDto,
+  ) {
+    return this.authService.verifyPin(user.sub, dto.pin);
+  }
+
+  @Post('internal/verify-pin')
+  @HttpCode(HttpStatus.OK)
+  internalVerifyPin(@Body() dto: InternalVerifyPinDto) {
+    return this.authService.verifyPin(dto.userId, dto.pin);
   }
 }
