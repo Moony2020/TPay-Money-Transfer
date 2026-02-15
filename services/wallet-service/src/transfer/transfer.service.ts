@@ -96,7 +96,8 @@ export class TransferService {
     }
 
     try {
-      const authServiceUrl = process.env.AUTH_SERVICE_URL || 'http://127.0.0.1:3001';
+      const defaultUrl = process.env.NODE_ENV === 'production' ? 'http://tpay-auth-api:10000' : 'http://127.0.0.1:3001';
+      const authServiceUrl = process.env.AUTH_SERVICE_URL || defaultUrl;
       this.logger.log(`Attempting PIN verification via API: ${authServiceUrl}/auth/internal/verify-pin`);
       
       const response = await fetch(`${authServiceUrl}/auth/internal/verify-pin`, {

@@ -467,6 +467,27 @@ export default function SendMoney() {
               )}
 
               {/* Numeric Keypad */}
+              <style>{`
+                .keypad-button {
+                  display: flex !important;
+                  align-items: center !important;
+                  justify-content: center !important;
+                  text-align: center !important;
+                  font-size: 1.1rem !important;
+                  padding: 0 !important;
+                  margin: 0 !important;
+                  min-width: 0 !important;
+                }
+                .keypad-button .key-label {
+                  display: flex !important;
+                  align-items: center !important;
+                  justify-content: center !important;
+                  width: 100% !important;
+                  height: 100% !important;
+                  text-align: center !important;
+                  pointer-events: none;
+                }
+              `}</style>
               <div style={{ 
                 display: 'grid', 
                 gridTemplateColumns: 'repeat(3, 1fr)', 
@@ -481,6 +502,7 @@ export default function SendMoney() {
                   return (
                     <button
                       key={i}
+                      className="keypad-button"
                       disabled={isLoading}
                       onClick={() => {
                         if (key === 'back') {
@@ -501,28 +523,15 @@ export default function SendMoney() {
                         border: 'none',
                         background: 'var(--bg-tertiary)',
                         color: 'var(--text-primary)',
-                        fontSize: '1.1rem', // Further reduced
                         fontWeight: 600,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
                         cursor: 'pointer',
-                        padding: 0,
-                        margin: 0,
                         transition: 'transform 0.1s active',
                         opacity: isLoading ? 0.5 : 1
                       }}
                       onMouseDown={(e) => e.target.style.transform = 'scale(0.95)'}
                       onMouseUp={(e) => e.target.style.transform = 'scale(1)'}
                     >
-                      <span style={{ 
-                        display: 'flex', 
-                        alignItems: 'center', 
-                        justifyContent: 'center',
-                        width: '100%',
-                        height: '100%',
-                        textAlign: 'center'
-                      }}>
+                      <span className="key-label">
                         {key === 'back' ? (
                           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"/><line x1="18" y1="9" x2="12" y2="15"/><line x1="12" y1="9" x2="18" y2="15"/>
