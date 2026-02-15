@@ -201,16 +201,9 @@ export class TransferService {
         });
 
         if (recipientWallet) {
-          // Fetch recipient's phone for guest notification (phone room)
-          const recipientUser: any[] = await this.prisma.$queryRaw`
-            SELECT phone_number FROM public.users WHERE id = ${recipientWallet.userId} LIMIT 1
-          `;
-          const recipientPhone = recipientUser[0]?.phone_number;
-
           // Notify Recipient
           await this.redisClient.publish('tpay_notifications', JSON.stringify({
             userId: recipientWallet.userId,
-            phoneNumber: recipientPhone, // Crucial for Guest routing
             type: 'TRANSFER_RECEIVED',
             title: 'Money Received! 💰',
             message: `You received SSP ${amount.toFixed(2)} from ${dto.senderWalletId.substring(0, 8)}...`,

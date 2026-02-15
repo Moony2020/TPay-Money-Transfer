@@ -76,20 +76,6 @@ export function NotificationProvider({ children }) {
   }, []);
 
   useEffect(() => {
-    const handleStorageChange = (e) => {
-      if (e.key === 'tpay_notification_unread') {
-        const newVal = e.newValue ? parseInt(e.newValue) : 0;
-        setUnreadCount(newVal);
-      }
-      if (e.key === 'tpay_notification_history') {
-        setHistory(e.newValue ? JSON.parse(e.newValue) : []);
-      }
-    };
-    window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
-  }, []);
-
-  useEffect(() => {
     const token = localStorage.getItem('tpay_token');
     const phoneNumber = localStorage.getItem('tpay_phone');
 
