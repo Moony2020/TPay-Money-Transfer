@@ -78,7 +78,8 @@ export function NotificationProvider({ children }) {
   useEffect(() => {
     const handleStorageChange = (e) => {
       if (e.key === 'tpay_notification_unread') {
-        setUnreadCount(e.newValue ? parseInt(e.newValue) : 0);
+        const newVal = e.newValue ? parseInt(e.newValue) : 0;
+        setUnreadCount(newVal);
       }
       if (e.key === 'tpay_notification_history') {
         setHistory(e.newValue ? JSON.parse(e.newValue) : []);
