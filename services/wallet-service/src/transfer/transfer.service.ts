@@ -96,13 +96,12 @@ export class TransferService {
     }
 
     const nodeEnv = process.env.NODE_ENV || 'development';
-    // Use public URL as primary fallback for production to avoid flaky internal networking on free tier
-    const defaultProdUrl = 'https://tpay-auth-api.onrender.com';
-    const defaultUrl = nodeEnv === 'production' ? defaultProdUrl : 'http://127.0.0.1:3001';
-    const authServiceUrl = process.env.AUTH_SERVICE_URL || defaultUrl;
+    // FORCE public URL in production to bypass flaky internal networking and manual dashboard config
+    const publicAuthUrl = 'https://tpay-auth-api.onrender.com';
+    const authServiceUrl = nodeEnv === 'production' ? publicAuthUrl : (process.env.AUTH_SERVICE_URL || 'http://127.0.0.1:3001');
 
     try {
-      this.logger.log(`Attempting PIN verification. NODE_ENV: ${nodeEnv}, API: ${authServiceUrl}/auth/internal/verify-pin`);
+      this.logger.log(`Initiating PIN verification. Target: ${authServiceUrl}/auth/internal/verify-pin`);
       
       const response = await fetch(`${authServiceUrl}/auth/internal/verify-pin`, {
         method: 'POST',
