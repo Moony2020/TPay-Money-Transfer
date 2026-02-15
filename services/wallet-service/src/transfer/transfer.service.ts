@@ -118,11 +118,12 @@ export class TransferService {
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         this.logger.warn(`Auth service responded with status ${response.status}: ${JSON.stringify(errorData)}`);
-        throw new UnauthorizedException('Security check failed: Invalid PIN');
+        // Throw 400 instead of 401 to prevent frontend auto-logout interceptor from kicking in
+        throw new BadRequestException('Security check failed: Invalid PIN');
       }
     } catch (err: any) {
       this.logger.error(`PIN Verification error using ${authServiceUrl}: ${err.message}`, err.stack);
-      if (err instanceof UnauthorizedException) throw err;
+      if (err instanceof BadRequestException) throw err;
       throw new InternalServerErrorException('Security verification service unavailable');
     }
 

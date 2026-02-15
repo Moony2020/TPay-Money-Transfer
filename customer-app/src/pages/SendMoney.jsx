@@ -189,13 +189,16 @@ export default function SendMoney() {
     }
   };
 
-  const executeTransfer = async () => {
+  const executeTransfer = async (pinToUse = pin) => {
     if (!senderWallet) {
-      setError('Sender wallet not loaded');
+      setError('Sender wallet not found');
       return;
     }
 
     setIsLoading(true);
+    setError(null);
+    telemetry.log('transfer_started', { amount: parseFloat(amount) });
+
     try {
       console.log('>>> [SendMoney] Executing transfer...');
       const result = await walletService.sendMoney(
@@ -203,7 +206,7 @@ export default function SendMoney() {
         recipient.replace(/[\s-]/g, ''),
         amount,
         description || 'P2P Transfer',
-        pin
+        pinToUse
       );
       
       console.log('>>> [SendMoney] Transfer result:', result);
@@ -517,7 +520,7 @@ export default function SendMoney() {
                           const newPin = pin + key;
                           setPin(newPin);
                           if (newPin.length === 6) {
-                            setTimeout(() => executeTransfer(), 300);
+                            setTimeout(() => executeTransfer(newPin), 300);
                           }
                         }
                       }}
