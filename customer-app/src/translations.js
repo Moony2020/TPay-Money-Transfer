@@ -118,7 +118,9 @@ export const translations = {
       transactionAlerts: 'Transaction Alerts',
       securityAlerts: 'Security Alerts',
       promoNotifications: 'Promo Notifications',
-      updates: 'App Updates'
+      updates: 'App Updates',
+      receivedMoney: 'You received SSP',
+      transferSent: 'Transfer sent: SSP'
     },
     receive: {
       title: 'Receive Money',
@@ -355,7 +357,9 @@ export const translations = {
       transactionAlerts: 'تنبيهات المعاملات',
       securityAlerts: 'تنبيهات الأمان',
       promoNotifications: 'العروض الترويجية',
-      updates: 'تحديثات التطبيق'
+      updates: 'تحديثات التطبيق',
+      receivedMoney: 'لقد استلمت مبلغ',
+      transferSent: 'تم إرسال مبلغ'
     },
     receive: {
       title: 'استلام الأموال',

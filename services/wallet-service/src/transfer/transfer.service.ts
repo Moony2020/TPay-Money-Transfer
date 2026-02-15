@@ -201,13 +201,21 @@ export class TransferService {
         });
 
         if (recipientWallet) {
+          // Clean phone number for Redis room matching
+          const cleanPhone = dto.recipientPhone.replace(/[\s-]/g, '');
+
           // Notify Recipient
           await this.redisClient.publish('tpay_notifications', JSON.stringify({
             userId: recipientWallet.userId,
+            phoneNumber: cleanPhone, // Pass cleaned phone for guest routing
             type: 'TRANSFER_RECEIVED',
             title: 'Money Received! 💰',
-            message: `You received SSP ${amount.toFixed(2)} from ${dto.senderWalletId.substring(0, 8)}...`,
-            data: { transactionId: result.id, amount: amount.toFixed(2) }
+            message: `notifications.receivedMoney:${amount.toFixed(2)}`, 
+            data: { 
+              transactionId: result.id, 
+              amount: amount.toFixed(2),
+              senderPhone: dto.senderWalletId.substring(0, 8) // Placeholder for sender
+            }
           }));
 
           // Notify Sender
