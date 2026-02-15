@@ -83,7 +83,7 @@ export default function LoginPage() {
             </svg>
           </button>
           {unreadCount > 0 && (
-            <span className="notification-badge" style={{ right: '4px', top: '4px' }}>
+            <span className="notification-badge" style={{ right: '0px', top: '0px' }}>
               {unreadCount > 9 ? '9+' : unreadCount}
             </span>
           )}
