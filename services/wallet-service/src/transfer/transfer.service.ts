@@ -201,13 +201,13 @@ export class TransferService {
         });
 
         if (recipientWallet) {
-          // Clean phone number for Redis room matching
-          const cleanPhone = dto.recipientPhone.replace(/[\s-]/g, '');
+          // Clean phone number for Redis room matching (if provided)
+          const cleanPhone = dto.recipientPhone ? dto.recipientPhone.replace(/[\s-]/g, '') : null;
 
           // Notify Recipient
           await this.redisClient.publish('tpay_notifications', JSON.stringify({
             userId: recipientWallet.userId,
-            phoneNumber: cleanPhone, // Pass cleaned phone for guest routing
+            phoneNumber: cleanPhone, // Pass phone for guest routing if available
             type: 'TRANSFER_RECEIVED',
             title: 'Money Received! 💰',
             message: `notifications.receivedMoney:${amount.toFixed(2)}`, 
