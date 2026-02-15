@@ -53,7 +53,7 @@ const getInitials = (name) => {
 export default function WalletDashboard() {
   const { user } = useAuth();
   const { t, langCode } = useLanguage();
-  const { notify } = useNotification();
+  const { notify, unreadCount, markAsRead } = useNotification();
   const [balance, setBalance] = useState(null);
   const [transactions, setTransactions] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -179,9 +179,21 @@ export default function WalletDashboard() {
             <p className="text-title">{t('wallet.welcomeBack')} {user?.name?.split(' ')[0] || 'User'}! 👋</p>
           </div>
         </div>
-        <button className="btn btn-ghost" style={{ width: 'auto', padding: '8px' }}>
-          🔔
-        </button>
+        <Link 
+          to="/profile/notifications" 
+          className="notification-bell-container"
+          onClick={markAsRead}
+          style={{ textDecoration: 'none' }}
+        >
+          <button className="btn btn-ghost" style={{ width: 'auto', padding: '8px' }}>
+            <span style={{ fontSize: '20px' }}>🔔</span>
+          </button>
+          {unreadCount > 0 && (
+            <span className="notification-badge">
+              {unreadCount > 9 ? '9+' : unreadCount}
+            </span>
+          )}
+        </Link>
       </header>
 
       <div className="page-content">
