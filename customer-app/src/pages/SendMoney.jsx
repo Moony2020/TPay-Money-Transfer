@@ -500,12 +500,14 @@ export default function SendMoney() {
                         border: 'none',
                         background: 'var(--bg-tertiary)',
                         color: 'var(--text-primary)',
-                        fontSize: '1.5rem',
+                        fontSize: '1.25rem', // Slightly smaller font
                         fontWeight: 600,
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
+                        textAlign: 'center', // Ensure text center
                         cursor: 'pointer',
+                        padding: 0, // Remove any default padding
                         transition: 'transform 0.1s active',
                         opacity: isLoading ? 0.5 : 1
                       }}

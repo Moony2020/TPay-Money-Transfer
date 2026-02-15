@@ -97,6 +97,8 @@ export class TransferService {
 
     try {
       const authServiceUrl = process.env.AUTH_SERVICE_URL || 'http://127.0.0.1:3001';
+      this.logger.log(`Attempting PIN verification via API: ${authServiceUrl}/auth/internal/verify-pin`);
+      
       const response = await fetch(`${authServiceUrl}/auth/internal/verify-pin`, {
         method: 'POST',
         headers: {
