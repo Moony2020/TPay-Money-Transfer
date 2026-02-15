@@ -99,14 +99,7 @@ export default function WalletDashboard() {
         };
       });
 
-      // Check for new incoming transactions during polling
-      if (isPolling && mappedTransactions.length > 0) {
-        const latest = mappedTransactions[0];
-        if (lastTxId && latest.txId !== lastTxId && latest.type === 'credit') {
-          notify(`${t('notifications.receivedMoney') || 'Received Money!'}: SSP ${latest.amount}`, 'received');
-        }
-      }
-
+      // Update reference for new transactions but let SOCKET handle notifications
       if (mappedTransactions.length > 0) {
         setLastTxId(mappedTransactions[0].txId);
       }

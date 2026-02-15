@@ -71,14 +71,15 @@ export class NotificationsGateway implements OnGatewayConnection, OnGatewayDisco
   }
 
   sendToUser(userId: string, event: string, data: any) {
-    this.server.to(`user_${userId}`).emit(event, data);
+    let target = this.server.to(`user_${userId}`);
     
     // Fallback to phone-based room if available in data
     const phone = data.phoneNumber || data.recipientPhone || data.phone;
     if (phone) {
-      this.server.to(`phone_${phone}`).emit(event, data);
+      target = target.to(`phone_${phone}`);
     }
-    
+
+    target.emit(event, data);
     this.logger.log(`Sent ${event} to user ${userId} and phone room ${phone || 'none'}`);
   }
 

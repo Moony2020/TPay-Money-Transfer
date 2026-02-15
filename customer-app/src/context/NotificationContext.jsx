@@ -19,8 +19,10 @@ export function NotificationProvider({ children }) {
   const { isAuthenticated } = useAuth();
   const { t } = useLanguage();
 
-  const notify = useCallback((message, type = 'info', data = {}) => {
+  const notify = useCallback((message, type = 'info', data = {}, options = {}) => {
+    const { noBadge = false, noHistory = false, sound = true } = options;
     const id = Date.now();
+    
     // Wrap message in t() if it's a key
     const displayMessage = message.includes('notifications.') ? t(message.split(':')[0]) + (message.includes(':') ? ': ' + message.split(':').slice(1).join(':') : '') : message;
     
@@ -29,27 +31,33 @@ export function NotificationProvider({ children }) {
     // Add to toast notifications (fleeting)
     setNotifications(prev => [...prev, { id, message: displayMessage, type }]);
     
-    // Add to history (persistent)
-    setHistory(prev => {
-      const updated = [newNotification, ...prev].slice(0, 50); // Keep last 50
-      localStorage.setItem('tpay_notification_history', JSON.stringify(updated));
-      return updated;
-    });
+    if (!noHistory) {
+      // Add to history (persistent)
+      setHistory(prev => {
+        const updated = [newNotification, ...prev].slice(0, 50); // Keep last 50
+        localStorage.setItem('tpay_notification_history', JSON.stringify(updated));
+        return updated;
+      });
+    }
 
-    // Update unread count
-    setUnreadCount(prev => {
-      const updated = prev + 1;
-      localStorage.setItem('tpay_notification_unread', updated.toString());
-      return updated;
-    });
+    if (!noBadge) {
+      // Update unread count
+      setUnreadCount(prev => {
+        const updated = prev + 1;
+        localStorage.setItem('tpay_notification_unread', updated.toString());
+        return updated;
+      });
+    }
 
     // Play sound based on type
-    try {
-      const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
-      audio.volume = 0.5;
-      audio.play().catch(e => console.warn('[Sound] Blocked by browser:', e.message));
-    } catch (e) {
-      console.warn('[Sound] Error playing notification sound:', e);
+    if (sound) {
+      try {
+        const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
+        audio.volume = 0.5;
+        audio.play().catch(e => console.warn('[Sound] Blocked by browser:', e.message));
+      } catch (e) {
+        console.warn('[Sound] Error playing notification sound:', e);
+      }
     }
     
     setTimeout(() => {
@@ -79,8 +87,17 @@ export function NotificationProvider({ children }) {
       return;
     }
 
-    // Only connect if not already connected
-    if (socketRef.current?.connected) return;
+    // Connect or Re-connect if auth state changed (e.g. guest -> logged in)
+    const isActuallyAuthenticated = !!token && isAuthenticated;
+    const currentConnectionIsGuest = socketRef.current?.connected && !socketRef.current.auth?.token;
+
+    if (socketRef.current?.connected && !(isActuallyAuthenticated && currentConnectionIsGuest)) {
+      return;
+    }
+
+    if (socketRef.current) {
+      socketRef.current.disconnect();
+    }
 
     const authUrl = window.location.hostname === 'localhost' 
       ? 'http://localhost:3001/notifications' 
@@ -88,14 +105,14 @@ export function NotificationProvider({ children }) {
 
     const newSocket = io(authUrl, {
       auth: { 
-        token, 
+        token: isActuallyAuthenticated ? token : null, 
         phoneNumber: phoneNumber?.replace(/[\s-]/g, '') 
       },
       transports: ['websocket']
     });
 
     newSocket.on('connect', () => {
-      console.log('>>> [Socket] Connected to notifications center');
+      console.log(`>>> [Socket] Connected to notifications center (${isActuallyAuthenticated ? 'Authenticated' : 'Guest'})`);
     });
     
     newSocket.on('notification', (data) => {
@@ -107,14 +124,19 @@ export function NotificationProvider({ children }) {
         'error': 'error'
       };
 
-      notify(data.message, typeMap[data.type] || 'info', data);
+      // For TRANSFER_SENT, we only want sound and toast, NO history/badge (user's request)
+      const options = {
+        noBadge: data.type === 'TRANSFER_SENT',
+        noHistory: data.type === 'TRANSFER_SENT'
+      };
+
+      notify(data.message, typeMap[data.type] || 'info', data, options);
     });
 
     socketRef.current = newSocket;
 
     return () => {
       if (newSocket) newSocket.disconnect();
-      socketRef.current = null;
     };
   }, [isAuthenticated, notify]);
 
