@@ -53,12 +53,11 @@ const getInitials = (name) => {
 export default function WalletDashboard() {
   const { user } = useAuth();
   const { t, langCode } = useLanguage();
-  const { notify, unreadCount, markAsRead } = useNotification();
+  const { unreadCount, markAsRead } = useNotification();
   const [balance, setBalance] = useState(null);
   const [transactions, setTransactions] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [lastTxId, setLastTxId] = useState(null);
 
   const loadWalletData = useCallback(async (isPolling = false) => {
     try {
@@ -99,11 +98,6 @@ export default function WalletDashboard() {
         };
       });
 
-      // Update reference for new transactions but let SOCKET handle notifications
-      if (mappedTransactions.length > 0) {
-        setLastTxId(mappedTransactions[0].txId);
-      }
-
       setTransactions(mappedTransactions);
       if (!isPolling) telemetry.log('dashboard_loaded', { walletId: wallet.id });
     } catch (err) {
@@ -113,7 +107,7 @@ export default function WalletDashboard() {
     } finally {
       if (!isPolling) setIsLoading(false);
     }
-  }, [langCode, t, lastTxId, notify]);
+  }, [langCode, t]);
 
   useEffect(() => {
     loadWalletData();
@@ -182,7 +176,7 @@ export default function WalletDashboard() {
             <span style={{ fontSize: '20px' }}>🔔</span>
           </button>
           {unreadCount > 0 && (
-            <span className="notification-badge" style={{ right: '4px', top: '4px' }}>
+            <span className="notification-badge" style={{ right: '6px', top: '6px' }}>
               {unreadCount > 9 ? '9+' : unreadCount}
             </span>
           )}
@@ -234,7 +228,7 @@ export default function WalletDashboard() {
                 <p>{t('wallet.noTransactions')}</p>
               </div>
             ) : (
-              transactions.map((tx) => (
+              transactions.slice(0, 4).map((tx) => (
                 <Link 
                   key={tx.id} 
                   to={`/history/${tx.id}`}
