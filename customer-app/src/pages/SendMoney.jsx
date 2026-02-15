@@ -471,13 +471,14 @@ export default function SendMoney() {
                   display: flex !important;
                   align-items: center !important;
                   justify-content: center !important;
+                  text-align: center !important; /* Fallback */
                   width: 100% !important;
                   height: 64px !important;
                   background: var(--bg-tertiary) !important;
                   color: var(--text-primary) !important;
                   border-radius: 16px !important;
                   border: none !important;
-                  font-size: 1.25rem !important;
+                  font-size: 1.5rem !important; /* Restored size */
                   font-weight: 600 !important;
                   cursor: pointer !important;
                   padding: 0 !important;
@@ -490,6 +491,7 @@ export default function SendMoney() {
                 }
                 .keypad-button svg {
                   display: block !important;
+                  margin: 0 auto !important;
                 }
               `}</style>
               <div style={{ 
@@ -497,10 +499,11 @@ export default function SendMoney() {
                 gridTemplateColumns: 'repeat(3, 1fr)', 
                 gap: '16px', 
                 width: '100%', 
-                maxWidth: '300px',
-                margin: '0 auto', // Centering
+                maxWidth: '320px',
+                margin: '0 auto',
                 marginTop: 'auto',
-                marginBottom: '40px'
+                marginBottom: '40px',
+                justifyItems: 'center'
               }}>
                 {[1, 2, 3, 4, 5, 6, 7, 8, 9, '', 0, 'back'].map((key, i) => {
                   if (key === '') return <div key={i} />;

@@ -95,10 +95,11 @@ export class TransferService {
       throw new BadRequestException('Sender wallet not found');
     }
 
+    const nodeEnv = process.env.NODE_ENV || 'development';
+    const defaultUrl = nodeEnv === 'production' ? 'http://tpay-auth-api:10000' : 'http://127.0.0.1:3001';
+    const authServiceUrl = process.env.AUTH_SERVICE_URL || defaultUrl;
+
     try {
-      const nodeEnv = process.env.NODE_ENV || 'development';
-      const defaultUrl = nodeEnv === 'production' ? 'http://tpay-auth-api:10000' : 'http://127.0.0.1:3001';
-      const authServiceUrl = process.env.AUTH_SERVICE_URL || defaultUrl;
       this.logger.log(`Attempting PIN verification. NODE_ENV: ${nodeEnv}, API: ${authServiceUrl}/auth/internal/verify-pin`);
       
       const response = await fetch(`${authServiceUrl}/auth/internal/verify-pin`, {
