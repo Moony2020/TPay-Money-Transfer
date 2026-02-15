@@ -109,12 +109,16 @@ export class TransferService {
           userId: senderWallet.userId,
           pin: dto.pin,
         }),
+        signal: AbortSignal.timeout(10000), // 10s timeout
       });
 
       if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        this.logger.warn(`Auth service responded with status ${response.status}: ${JSON.stringify(errorData)}`);
         throw new UnauthorizedException('Security check failed: Invalid PIN');
       }
-    } catch (err) {
+    } catch (err: any) {
+      this.logger.error(`PIN Verification error: ${err.message}`, err.stack);
       if (err instanceof UnauthorizedException) throw err;
       throw new InternalServerErrorException('Security verification service unavailable');
     }

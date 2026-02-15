@@ -466,26 +466,30 @@ export default function SendMoney() {
                 </div>
               )}
 
-              {/* Numeric Keypad */}
               <style>{`
                 .keypad-button {
                   display: flex !important;
                   align-items: center !important;
                   justify-content: center !important;
-                  text-align: center !important;
-                  font-size: 1.1rem !important;
+                  width: 100% !important;
+                  height: 64px !important;
+                  background: var(--bg-tertiary) !important;
+                  color: var(--text-primary) !important;
+                  border-radius: 16px !important;
+                  border: none !important;
+                  font-size: 1.25rem !important;
+                  font-weight: 600 !important;
+                  cursor: pointer !important;
                   padding: 0 !important;
                   margin: 0 !important;
-                  min-width: 0 !important;
+                  transition: transform 0.1s ease !important;
+                  box-sizing: border-box !important;
                 }
-                .keypad-button .key-label {
-                  display: flex !important;
-                  align-items: center !important;
-                  justify-content: center !important;
-                  width: 100% !important;
-                  height: 100% !important;
-                  text-align: center !important;
-                  pointer-events: none;
+                .keypad-button:active:not(:disabled) {
+                  transform: scale(0.95) !important;
+                }
+                .keypad-button svg {
+                  display: block !important;
                 }
               `}</style>
               <div style={{ 
@@ -511,33 +515,16 @@ export default function SendMoney() {
                           const newPin = pin + key;
                           setPin(newPin);
                           if (newPin.length === 6) {
-                            // Automatically trigger transfer when 6th digit entered
                             setTimeout(() => executeTransfer(), 300);
                           }
                         }
                       }}
-                      style={{
-                        width: '100%',
-                        height: '64px',
-                        borderRadius: '16px',
-                        border: 'none',
-                        background: 'var(--bg-tertiary)',
-                        color: 'var(--text-primary)',
-                        fontWeight: 600,
-                        cursor: 'pointer',
-                        transition: 'transform 0.1s active',
-                        opacity: isLoading ? 0.5 : 1
-                      }}
-                      onMouseDown={(e) => e.target.style.transform = 'scale(0.95)'}
-                      onMouseUp={(e) => e.target.style.transform = 'scale(1)'}
                     >
-                      <span className="key-label">
-                        {key === 'back' ? (
-                          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"/><line x1="18" y1="9" x2="12" y2="15"/><line x1="12" y1="9" x2="18" y2="15"/>
-                          </svg>
-                        ) : key}
-                      </span>
+                      {key === 'back' ? (
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"/><line x1="18" y1="9" x2="12" y2="15"/><line x1="12" y1="9" x2="18" y2="15"/>
+                        </svg>
+                      ) : key}
                     </button>
                   );
                 })}
