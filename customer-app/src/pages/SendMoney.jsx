@@ -429,8 +429,8 @@ export default function SendMoney() {
       case 4:
         return (
           <div className="page" style={{ background: 'var(--bg-primary)' }}>
-            <div className="p-lg flex-col" style={{ alignItems: 'center' }}>
-              <div style={{ marginTop: '40px' }} className="text-center">
+            <div className="p-lg flex-col" style={{ alignItems: 'center', width: '100%' }}>
+              <div style={{ marginTop: '40px', width: '100%' }} className="text-center">
                 <h1 className="text-heading mb-sm">{t('send.enterPin')}</h1>
                 <p className="text-body" style={{ color: 'var(--text-secondary)' }}>
                   {t('send.verifyPinDesc')}
@@ -438,7 +438,7 @@ export default function SendMoney() {
               </div>
 
               {/* PIN Dots */}
-              <div className="flex-center" style={{ gap: '16px', margin: '48px 0' }}>
+              <div className="flex-center" style={{ gap: '16px', margin: '48px 0', width: '100%' }}>
                 {[0, 1, 2, 3, 4, 5].map((idx) => (
                   <div
                     key={idx}
@@ -455,14 +455,14 @@ export default function SendMoney() {
               </div>
 
               {error && (
-                <div className="text-center mb-md">
+                <div className="text-center mb-md" style={{ width: '100%' }}>
                   <p className="input-error-text animate-shake">{error}</p>
                 </div>
               )}
 
               {isLoading && (
-                <div className="text-center mb-lg">
-                  <div className="loading-spinner" style={{ width: 24, height: 24, border: '3px solid var(--primary)', borderTopColor: 'transparent' }} />
+                <div className="text-center mb-lg" style={{ width: '100%' }}>
+                  <div className="loading-spinner" style={{ width: 24, height: 24, border: '3px solid var(--primary)', borderTopColor: 'transparent', margin: '0 auto' }} />
                 </div>
               )}
 
@@ -471,14 +471,13 @@ export default function SendMoney() {
                   display: flex !important;
                   align-items: center !important;
                   justify-content: center !important;
-                  text-align: center !important; /* Fallback */
                   width: 100% !important;
                   height: 64px !important;
                   background: var(--bg-tertiary) !important;
                   color: var(--text-primary) !important;
                   border-radius: 16px !important;
                   border: none !important;
-                  font-size: 1.5rem !important; /* Restored size */
+                  font-size: 1.75rem !important;
                   font-weight: 600 !important;
                   cursor: pointer !important;
                   padding: 0 !important;
@@ -494,17 +493,16 @@ export default function SendMoney() {
                   margin: 0 auto !important;
                 }
               `}</style>
-              <div style={{ 
-                display: 'grid', 
-                gridTemplateColumns: 'repeat(3, 1fr)', 
-                gap: '16px', 
-                width: '100%', 
-                maxWidth: '320px',
-                margin: '0 auto',
-                marginTop: 'auto',
-                marginBottom: '40px',
-                justifyItems: 'center'
-              }}>
+              
+              <div style={{ display: 'flex', justifyContent: 'center', width: '100%', marginTop: 'auto', marginBottom: '40px' }}>
+                <div style={{ 
+                  display: 'grid', 
+                  gridTemplateColumns: 'repeat(3, 1fr)', 
+                  gap: '16px', 
+                  width: '100%', 
+                  maxWidth: '320px',
+                  justifyItems: 'center'
+                }}>
                 {[1, 2, 3, 4, 5, 6, 7, 8, 9, '', 0, 'back'].map((key, i) => {
                   if (key === '') return <div key={i} />;
                   return (
@@ -532,6 +530,7 @@ export default function SendMoney() {
                     </button>
                   );
                 })}
+                </div>
               </div>
 
               <button 

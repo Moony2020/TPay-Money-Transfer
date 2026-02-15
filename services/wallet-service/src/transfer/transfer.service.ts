@@ -96,7 +96,9 @@ export class TransferService {
     }
 
     const nodeEnv = process.env.NODE_ENV || 'development';
-    const defaultUrl = nodeEnv === 'production' ? 'http://tpay-auth-api:10000' : 'http://127.0.0.1:3001';
+    // Use public URL as primary fallback for production to avoid flaky internal networking on free tier
+    const defaultProdUrl = 'https://tpay-auth-api.onrender.com';
+    const defaultUrl = nodeEnv === 'production' ? defaultProdUrl : 'http://127.0.0.1:3001';
     const authServiceUrl = process.env.AUTH_SERVICE_URL || defaultUrl;
 
     try {
