@@ -96,9 +96,10 @@ export class TransferService {
     }
 
     try {
-      const defaultUrl = process.env.NODE_ENV === 'production' ? 'http://tpay-auth-api:10000' : 'http://127.0.0.1:3001';
+      const nodeEnv = process.env.NODE_ENV || 'development';
+      const defaultUrl = nodeEnv === 'production' ? 'http://tpay-auth-api:10000' : 'http://127.0.0.1:3001';
       const authServiceUrl = process.env.AUTH_SERVICE_URL || defaultUrl;
-      this.logger.log(`Attempting PIN verification via API: ${authServiceUrl}/auth/internal/verify-pin`);
+      this.logger.log(`Attempting PIN verification. NODE_ENV: ${nodeEnv}, API: ${authServiceUrl}/auth/internal/verify-pin`);
       
       const response = await fetch(`${authServiceUrl}/auth/internal/verify-pin`, {
         method: 'POST',
@@ -118,7 +119,7 @@ export class TransferService {
         throw new UnauthorizedException('Security check failed: Invalid PIN');
       }
     } catch (err: any) {
-      this.logger.error(`PIN Verification error: ${err.message}`, err.stack);
+      this.logger.error(`PIN Verification error using ${authServiceUrl}: ${err.message}`, err.stack);
       if (err instanceof UnauthorizedException) throw err;
       throw new InternalServerErrorException('Security verification service unavailable');
     }

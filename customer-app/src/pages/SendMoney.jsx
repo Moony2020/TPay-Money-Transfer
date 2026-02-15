@@ -429,7 +429,7 @@ export default function SendMoney() {
       case 4:
         return (
           <div className="page" style={{ background: 'var(--bg-primary)' }}>
-            <div className="p-lg flex-column items-center">
+            <div className="p-lg flex-col" style={{ alignItems: 'center' }}>
               <div style={{ marginTop: '40px' }} className="text-center">
                 <h1 className="text-heading mb-sm">{t('send.enterPin')}</h1>
                 <p className="text-body" style={{ color: 'var(--text-secondary)' }}>
@@ -498,6 +498,7 @@ export default function SendMoney() {
                 gap: '16px', 
                 width: '100%', 
                 maxWidth: '300px',
+                margin: '0 auto', // Centering
                 marginTop: 'auto',
                 marginBottom: '40px'
               }}>
