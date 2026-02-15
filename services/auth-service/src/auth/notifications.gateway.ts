@@ -27,19 +27,32 @@ export class NotificationsGateway implements OnGatewayConnection, OnGatewayDisco
   async handleConnection(client: Socket) {
     try {
       const token = client.handshake.auth?.token || client.handshake.headers?.authorization?.split(' ')[1];
-      if (!token) {
-        this.logger.warn(`Client ${client.id} connected without token`);
+      const phoneNumber = client.handshake.auth?.phoneNumber;
+
+      if (!token && !phoneNumber) {
+        this.logger.warn(`Client ${client.id} connected without identifier`);
         client.disconnect();
         return;
       }
 
-      const payload = await this.jwtService.verifyAsync(token);
-      const userId = payload.sub;
-      
-      this.userSockets.set(userId, client.id);
-      client.join(`user_${userId}`);
-      
-      this.logger.log(`User ${userId} connected on socket ${client.id}`);
+      if (token) {
+        try {
+          const payload = await this.jwtService.verifyAsync(token);
+          const userId = payload.sub;
+          this.userSockets.set(userId, client.id);
+          client.join(`user_${userId}`);
+          this.logger.log(`User ${userId} connected on socket ${client.id}`);
+          return;
+        } catch (e) {
+          this.logger.warn(`Invalid token for ${client.id}, falling back to phone if available`);
+        }
+      }
+
+      if (phoneNumber) {
+        // Allow ephemeral connection via phone number for logged-out alerts
+        client.join(`phone_${phoneNumber}`);
+        this.logger.log(`Guest phone ${phoneNumber} connected on socket ${client.id}`);
+      }
     } catch (err: any) {
       this.logger.error(`Connection failed: ${err.message}`);
       client.disconnect();
@@ -59,7 +72,14 @@ export class NotificationsGateway implements OnGatewayConnection, OnGatewayDisco
 
   sendToUser(userId: string, event: string, data: any) {
     this.server.to(`user_${userId}`).emit(event, data);
-    this.logger.log(`Sent ${event} to user ${userId}`);
+    
+    // Fallback to phone-based room if available in data
+    const phone = data.phoneNumber || data.recipientPhone || data.phone;
+    if (phone) {
+      this.server.to(`phone_${phone}`).emit(event, data);
+    }
+    
+    this.logger.log(`Sent ${event} to user ${userId} and phone room ${phone || 'none'}`);
   }
 
   @SubscribeMessage('ping')

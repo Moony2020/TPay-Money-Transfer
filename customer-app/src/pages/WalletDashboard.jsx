@@ -180,7 +180,7 @@ export default function WalletDashboard() {
           </div>
         </div>
         <Link 
-          to="/profile/notifications" 
+          to="/history" 
           className="notification-bell-container"
           onClick={markAsRead}
           style={{ textDecoration: 'none' }}
@@ -189,7 +189,7 @@ export default function WalletDashboard() {
             <span style={{ fontSize: '20px' }}>🔔</span>
           </button>
           {unreadCount > 0 && (
-            <span className="notification-badge">
+            <span className="notification-badge" style={{ right: '4px', top: '4px' }}>
               {unreadCount > 9 ? '9+' : unreadCount}
             </span>
           )}

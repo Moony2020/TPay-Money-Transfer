@@ -71,7 +71,7 @@ export default function LoginPage() {
       <header className="page-header" style={{ borderBottom: 'none', background: 'transparent', position: 'relative' }}>
         <Logo size="sm" />
         <Link 
-          to="/profile/notifications" 
+          to="/history" 
           className="notification-bell-container"
           onClick={markAsRead}
           style={{ textDecoration: 'none' }}
@@ -83,7 +83,7 @@ export default function LoginPage() {
             </svg>
           </button>
           {unreadCount > 0 && (
-            <span className="notification-badge">
+            <span className="notification-badge" style={{ right: '4px', top: '4px' }}>
               {unreadCount > 9 ? '9+' : unreadCount}
             </span>
           )}

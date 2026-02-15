@@ -1,6 +1,7 @@
-import { createContext, useContext, useState, useCallback, useEffect } from 'react';
+import { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react';
 import { io } from 'socket.io-client';
 import { useAuth } from './AuthContext';
+import { useLanguage } from './LanguageContext';
 
 const NotificationContext = createContext(null);
 
@@ -14,15 +15,19 @@ export function NotificationProvider({ children }) {
     const saved = localStorage.getItem('tpay_notification_unread');
     return saved ? parseInt(saved) : 0;
   });
-  const [socket, setSocket] = useState(null);
+  const socketRef = useRef(null);
   const { isAuthenticated } = useAuth();
+  const { t } = useLanguage();
 
   const notify = useCallback((message, type = 'info', data = {}) => {
     const id = Date.now();
-    const newNotification = { id, message, type, timestamp: new Date().toISOString(), data, read: false };
+    // Wrap message in t() if it's a key
+    const displayMessage = message.includes('notifications.') ? t(message.split(':')[0]) + (message.includes(':') ? ': ' + message.split(':').slice(1).join(':') : '') : message;
+    
+    const newNotification = { id, message: displayMessage, rawMessage: message, type, timestamp: new Date().toISOString(), data, read: false };
     
     // Add to toast notifications (fleeting)
-    setNotifications(prev => [...prev, { id, message, type }]);
+    setNotifications(prev => [...prev, { id, message: displayMessage, type }]);
     
     // Add to history (persistent)
     setHistory(prev => {
@@ -40,7 +45,6 @@ export function NotificationProvider({ children }) {
 
     // Play sound based on type
     try {
-      // Use a standard system notification sound if custom one fails
       const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
       audio.volume = 0.5;
       audio.play().catch(e => console.warn('[Sound] Blocked by browser:', e.message));
@@ -51,7 +55,7 @@ export function NotificationProvider({ children }) {
     setTimeout(() => {
       setNotifications(prev => prev.filter(n => n.id !== id));
     }, 5000);
-  }, []);
+  }, [t]);
 
   const markAsRead = useCallback(() => {
     setUnreadCount(0);
@@ -65,29 +69,33 @@ export function NotificationProvider({ children }) {
 
   useEffect(() => {
     const token = localStorage.getItem('tpay_token');
-    if (!token || !isAuthenticated) {
-      if (socket) {
-        socket.disconnect();
-        setSocket(null);
+    const phoneNumber = localStorage.getItem('tpay_phone');
+
+    if (!token && !phoneNumber) {
+      if (socketRef.current) {
+        socketRef.current.disconnect();
+        socketRef.current = null;
       }
       return;
     }
 
     // Only connect if not already connected
-    if (socket?.connected) return;
+    if (socketRef.current?.connected) return;
 
     const authUrl = window.location.hostname === 'localhost' 
       ? 'http://localhost:3001/notifications' 
       : 'https://tpay-auth-api.onrender.com/notifications';
 
     const newSocket = io(authUrl, {
-      auth: { token },
+      auth: { 
+        token, 
+        phoneNumber: phoneNumber?.replace(/[\s-]/g, '') 
+      },
       transports: ['websocket']
     });
 
     newSocket.on('connect', () => {
-      console.log('>>> [Socket] Connected to notifications');
-      setSocket(newSocket);
+      console.log('>>> [Socket] Connected to notifications center');
     });
     
     newSocket.on('notification', (data) => {
@@ -102,11 +110,13 @@ export function NotificationProvider({ children }) {
       notify(data.message, typeMap[data.type] || 'info', data);
     });
 
+    socketRef.current = newSocket;
+
     return () => {
       if (newSocket) newSocket.disconnect();
+      socketRef.current = null;
     };
-  }, [isAuthenticated, notify, socket]);
- // Dependencies are correct
+  }, [isAuthenticated, notify]);
 
   return (
     <NotificationContext.Provider value={{ notify, history, unreadCount, markAsRead }}>
